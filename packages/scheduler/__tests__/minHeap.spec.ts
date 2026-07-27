@@ -22,7 +22,6 @@ describe("test min heap", () => {
     push(tasks, createNode(3));
     expect(peek(tasks)?.sortIndex).toEqual(1);
     push(tasks, createNode(0));
-    console.log(tasks)
     expect(peek(tasks)?.sortIndex).toEqual(0);
     pop(tasks);
     expect(peek(tasks)?.sortIndex).toEqual(1);

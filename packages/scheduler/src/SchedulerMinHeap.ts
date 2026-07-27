@@ -1,5 +1,3 @@
-import {T} from "vitest/dist/chunks/traces.d.D2T_R8rx";
-
 export type Heap<T extends Node>=Array<T>
 export type Node={
     id:number, //唯一标识
