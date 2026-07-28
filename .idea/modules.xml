@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../DebugReact/.idea/DebugReact.iml" filepath="$PROJECT_DIR$/../DebugReact/.idea/DebugReact.iml" />
       <module fileurl="file://$PROJECT_DIR$/../mini-react/.idea/mini-react.iml" filepath="$PROJECT_DIR$/../mini-react/.idea/mini-react.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/xunbei-react.iml" filepath="$PROJECT_DIR$/.idea/xunbei-react.iml" />
     </modules>
