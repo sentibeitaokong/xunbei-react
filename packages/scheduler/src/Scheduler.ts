@@ -131,11 +131,11 @@ export function scheduleCallback(priorityLevel: PriorityLevel, callback: Callbac
         push(timeQueue, newTask)
         // 当前 taskQueue 为空且自身为 timeQueue 堆顶 → 启动倒计时
         if (peek(taskQueue) == null && newTask === peek(timeQueue)) {
-            if (isHostCallbackScheduled) {
+            if (isHostTimeoutScheduled) {
                 // 已有其他任务占着调度位，取消旧倒计时
                 cancelHostTimeout()
             } else {
-                isHostCallbackScheduled = true
+                isHostTimeoutScheduled = true
             }
             requestHostTimeout(handleTimeout, startTime - currentTime)
         }

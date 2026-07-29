@@ -1,3 +1,28 @@
 {
-  "xunbei-react": []
+  "xunbei-react": [
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-dom/src/client/ReactDOMRoot.js",
+      "linenumber": -1,
+      "name": "fiber节点",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react/src/jsx/ReactJSXElement.js",
+      "linenumber": -1,
+      "name": "jsx",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react/src/jsx/ReactJSXElement.js",
+      "linenumber": 280,
+      "name": "// console.log(\u0027element\u0027,element)",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-dom/src/client/ReactDOMRoot.js",
+      "linenumber": 258,
+      "name": "",
+      "bookmarkType": "DEFAULT"
+    }
+  ]
 }
