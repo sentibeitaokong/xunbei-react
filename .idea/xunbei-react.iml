@@ -8,7 +8,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="mini-react" />
     <orderEntry type="module" module-name="DebugReact" />
+    <orderEntry type="module" module-name="mini-react" />
   </component>
 </module>
