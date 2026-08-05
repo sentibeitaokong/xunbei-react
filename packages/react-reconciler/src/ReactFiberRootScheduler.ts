@@ -1,6 +1,7 @@
-import {FiberRoot} from "./ReactInternalTypes";
+import type {FiberRoot} from "./ReactInternalTypes";
 import {scheduleCallback} from 'scheduler/src/Scheduler'
 import {NormalPriority} from 'scheduler/src/SchedulerPriorities'
+import {performConcurrentWorkOnroot} from "./ReactFiberWorkLoop";
 
 export function ensureRootIsScheduled(root:FiberRoot){
     queueMicrotask(()=>{

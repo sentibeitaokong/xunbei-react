@@ -129,7 +129,49 @@ export function createFiberFormTypeAndProps(
     fiber.type = type;
     return fiber
 }
+//创建一个正在工作的fiber
+export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
+    let workInProgress = current.alternate;
 
+    if (workInProgress === null) {
+        workInProgress = createFiber(current.tag, pendingProps, current.key);
+        workInProgress.elementType = current.elementType;
+        workInProgress.type = current.type;
+        workInProgress.stateNode = current.stateNode;
+
+        workInProgress.alternate = current;
+
+        current.alternate = workInProgress;
+    } else {
+        workInProgress.pendingProps = pendingProps;
+        // Needed because Blocks store data on type.
+        workInProgress.type = current.type;
+
+        // We already have an alternate.
+        // Reset the effect tag.
+        workInProgress.flags = NoFlags;
+
+        // The effects are no longer valid.
+        // workInProgress.subtreeFlags = NoFlags;
+        // workInProgress.deletions = null;
+    }
+
+    // Reset all effects except static ones.
+    // Static effects are not specific to a render.
+    workInProgress.flags = current.flags;
+    // workInProgress.childLanes = current.childLanes;
+    // workInProgress.lanes = current.lanes;
+
+    workInProgress.child = current.child;
+    workInProgress.memoizedProps = current.memoizedProps;
+    workInProgress.memoizedState = current.memoizedState;
+    workInProgress.updateQueue = current.updateQueue;
+
+    workInProgress.sibling = current.sibling;
+    workInProgress.index = current.index;
+
+    return workInProgress;
+}
 
 
 
