@@ -129,52 +129,57 @@ export function createFiberFormTypeAndProps(
     fiber.type = type;
     return fiber
 }
-//创建一个正在工作的fiber
+/**
+ * 创建（或复用）一个正在工作中的 Fiber 节点（workInProgress）
+ *
+ * 这是 React 双缓冲（Double Buffering）机制的核心函数。
+ * React 同时维护两棵 Fiber 树：
+ * - current 树：当前屏幕上已渲染的 Fiber 树
+ * - workInProgress 树：正在构建的下一棵 Fiber 树
+ *
+ * 两棵树通过 alternate 指针互相引用，这样可以：
+ * 1. 复用已有的 Fiber 节点，避免每次更新都重新创建
+ * 2. 在构建新树时，current 树保持不变，屏幕不会闪烁
+ * 3. 构建完成后只需切换指针，而不是替换整棵树
+ *
+ * @param current      - current 树中对应的 Fiber 节点（当前屏幕上显示的版本）
+ * @param pendingProps - 新的 props（即将应用到该 Fiber 的属性）
+ * @returns workInProgress Fiber 节点（用于构建新树）
+ */
 export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
+    // 首先尝试复用 current.alternate（即上一轮渲染时对应的 workInProgress）
     let workInProgress = current.alternate;
 
     if (workInProgress === null) {
+        // 首次渲染或该节点之前未被复用：创建全新的 Fiber
         workInProgress = createFiber(current.tag, pendingProps, current.key);
+        // 复制实例相关字段（这些信息在更新时不变）
         workInProgress.elementType = current.elementType;
         workInProgress.type = current.type;
         workInProgress.stateNode = current.stateNode;
-
+        // 建立双向 alternate 引用：形成双缓冲闭环
         workInProgress.alternate = current;
-
         current.alternate = workInProgress;
     } else {
+        // 复用已有的 workInProgress 节点：只需更新变化的字段
         workInProgress.pendingProps = pendingProps;
-        // Needed because Blocks store data on type.
         workInProgress.type = current.type;
-
-        // We already have an alternate.
-        // Reset the effect tag.
+        // 重置副作用标记（旧 flags 已在上一次 commit 中处理完毕）
         workInProgress.flags = NoFlags;
-
-        // The effects are no longer valid.
-        // workInProgress.subtreeFlags = NoFlags;
-        // workInProgress.deletions = null;
     }
 
-    // Reset all effects except static ones.
-    // Static effects are not specific to a render.
+    // 无论新建还是复用，以下字段都需要从 current 同步
+    // 因为这些是上一次渲染的结果，需要作为本次 diff 的基准
     workInProgress.flags = current.flags;
-    // workInProgress.childLanes = current.childLanes;
-    // workInProgress.lanes = current.lanes;
-
     workInProgress.child = current.child;
     workInProgress.memoizedProps = current.memoizedProps;
     workInProgress.memoizedState = current.memoizedState;
     workInProgress.updateQueue = current.updateQueue;
 
+    // 链表结构也同步过来（sibling 和 index 在 reconcile 阶段可能会被修改）
     workInProgress.sibling = current.sibling;
     workInProgress.index = current.index;
 
     return workInProgress;
 }
-
-
-
-
-
 
