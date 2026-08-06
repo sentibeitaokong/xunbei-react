@@ -1,4 +1,6 @@
-//获取当前时间
+// 共享工具函数
+
+// 获取当前高精度时间戳（ms），用于时间切片计算
 export function getCurrentTime(): number {
     return performance.now();
 }

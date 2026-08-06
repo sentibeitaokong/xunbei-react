@@ -1,14 +1,4 @@
-// import {DefaultEventPriority} from "react-reconciler/src/ReactEventPriorities";
-
-// export function getCurrentEventPriority() {
-//   const currentEvent = window.event;
-//
-//   if (currentEvent === undefined) {
-//     return DefaultEventPriority;
-//   }
-//   // todo
-//   // return getEventPriority(currentEvent.type);
-// }
+// ReactDOM 宿主环境配置 —— DOM 相关操作
 
 export function shouldSetTextContent(type: string, props: any): boolean {
   return (
