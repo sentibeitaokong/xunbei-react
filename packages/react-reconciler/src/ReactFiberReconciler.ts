@@ -6,7 +6,6 @@ export function updateContainer(element:ReactNodeList,container:FiberRoot):void{
     //! 1.获取current
     const current=container.current;
     current.memoizedState={element}
-    console.log(current)
     // ! 2.调度更新
     scheduleUpdateOnFiber(container,current)
 }

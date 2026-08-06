@@ -1,6 +1,12 @@
 {
   "1.组件调度": [
     {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 2004,
+      "name": "6. 初始化工作栈",
+      "bookmarkType": "DEFAULT"
+    },
+    {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberConcurrentUpdates.js",
       "linenumber": 188,
       "name": "8. 向上冒泡优先级",
@@ -16,12 +22,6 @@
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-dom/src/client/ReactDOMRoot.js",
       "linenumber": 106,
       "name": "1.组件渲染入口",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 2008,
-      "name": "6. 初始化工作栈",
       "bookmarkType": "DEFAULT"
     },
     {
@@ -71,39 +71,45 @@
   ],
   "1.组件渲染": [
     {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
-      "linenumber": 336,
-      "name": "6. 协调子节点",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
-      "linenumber": 3786,
-      "name": "5. 复用子节点",
-      "bookmarkType": "DEFAULT"
-    },
-    {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 3353,
+      "linenumber": 3349,
       "name": "4. 组件树完整渲染",
       "bookmarkType": "DEFAULT"
     },
     {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
-      "linenumber": 4186,
-      "name": "3. 组件渲染核心beginWork",
-      "bookmarkType": "DEFAULT"
-    },
-    {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 2757,
+      "linenumber": 2753,
       "name": "2. 循环遍历执行渲染",
       "bookmarkType": "DEFAULT"
     },
     {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 2608,
+      "linenumber": 2604,
       "name": "1. render阶段入口函数（不使用时间切片）",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
+      "linenumber": 4188,
+      "name": "3. 组件渲染核心beginWork",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
+      "linenumber": 3788,
+      "name": "5. 复用子节点",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactChildFiber.js",
+      "linenumber": 430,
+      "name": "7. 协调子节点核心函数",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
+      "linenumber": 336,
+      "name": "6. 协调子节点",
       "bookmarkType": "DEFAULT"
     },
     {

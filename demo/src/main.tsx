@@ -82,12 +82,15 @@ import "./index.css";
 // }
 
 const jsx = (
-    <div className="border">
-        <h1>react</h1>
-        <a href="https://github.com/bubucuo/mini-react">mini react</a>
-        {/* <FunctionComponent name="函数组件" /> */}
-        {/* <ClassComponent name="类组件" /> */}
-        {/* <FragmentComponent /> */}
+    // <div className="border">
+    //     <h1>react</h1>
+    //     <a href="https://github.com/bubucuo/mini-react">mini react</a>
+    //     {/* <FunctionComponent name="函数组件" /> */}
+    //     {/* <ClassComponent name="类组件" /> */}
+    //     {/* <FragmentComponent /> */}
+    // </div>
+    <div className="box border">
+        <h1 className="border">omg</h1>
     </div>
 );
 

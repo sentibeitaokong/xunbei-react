@@ -2,6 +2,7 @@ import type {FiberRoot,Fiber} from "./ReactInternalTypes";
 import {ensureRootIsScheduled} from "./ReactFiberRootScheduler";
 import {createWorkInProgress} from "./ReactFiber";
 import {beginWork} from "./ReactFiberBeginWork";
+import {completeWork} from "./ReactFiberCompleteWork";
 
 type ExecutionContext = number;
 
@@ -23,14 +24,15 @@ let workInProgress :Fiber|null=null
 let workProgressRoot:FiberRoot|null=null;
 
 export function scheduleUpdateOnFiber(root:FiberRoot,fiber:Fiber){
-    workProgressRoot=root;
+    workProgressRoot =root;
     workInProgress = fiber;
     ensureRootIsScheduled(root)
 }
 
 export function performConcurrentWorkOnroot(root:FiberRoot){
-    //! 1.render构建Fiber树VDom
+    //! 1.render构建Fiber树VDom (beginWork|completeWork)
     renderRootSync(root)
+    console.log('root',root)
     //! 2.commit，VDom->Dom
     // commitRoot(root)
 }
@@ -79,7 +81,9 @@ function performUnitOfWork(unitOfWork:Fiber){
 function completeUnitOfWork(unitOfWork:Fiber){
     let completedWork=unitOfWork;
     do{
-        let next=completeWork(unitOfWork);
+        const current=completedWork.alternate
+        const returnFiber:Fiber = completedWork.return;
+        let next=completeWork(current,unitOfWork);
         if(next!==null){
             workInProgress=next;
             return
@@ -89,7 +93,7 @@ function completeUnitOfWork(unitOfWork:Fiber){
             workInProgress=siblingFiber;
             return
         }
-        completedWork=completedWork.return
+        completedWork=returnFiber as Fiber
         workInProgress=completedWork
     }while(completedWork!==null);
 }
