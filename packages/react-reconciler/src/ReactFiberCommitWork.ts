@@ -118,7 +118,6 @@ function commitPlacement(finishedWork:Fiber){
         // 向上查找最近的有 DOM 节点的祖先 Fiber（HostComponent 或 HostRoot）
         const parentFiber=getHostParenFiber(finishedWork)
         let parentDom=parentFiber.stateNode
-        console.log(parentDom)
         // 如果父 Fiber 是 HostRoot，其 stateNode 是 FiberRoot 对象
         // 真实的容器 DOM（如 <div id="root">）在 FiberRoot.container 中
         if(parentDom.container){
