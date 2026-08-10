@@ -24,3 +24,4 @@ export function isFn(sth: any) {
 export function isStr(sth: any) {
     return typeof sth === "string";
 }
+

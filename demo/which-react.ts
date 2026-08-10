@@ -14,10 +14,12 @@
 //   useEffect,
 //   useLayoutEffect,
 // } from "../packages/react/src";
+import {Fragment} from '../packages/react/src/index.ts'
 import ReactDOM from "../packages/react-dom/client/ReactDomRoot.ts";
 
 export {
     ReactDOM,
+    Fragment,
     // Component,
     // useReducer,
     // useState,

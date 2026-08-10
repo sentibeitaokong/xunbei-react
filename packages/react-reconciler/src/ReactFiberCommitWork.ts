@@ -17,7 +17,8 @@
 
 import type {FiberRoot,Fiber} from "./ReactInternalTypes";
 import {Placement} from "./ReactFiberFlags";
-import {HostComponent,HostRoot} from "./ReactWorkTags";
+import {HostComponent, HostRoot} from "./ReactWorkTags";
+import {isHost} from "./ReactFiberCompleteWork";
 
 /**
  * 提交 Mutation 副作用（Commit 阶段 Mutation 子阶段的入口）
@@ -112,7 +113,7 @@ function commitReconciliationEffects(finishedWork:Fiber){
 function commitPlacement(finishedWork:Fiber){
     // 只处理有真实 DOM 节点的 Fiber（HostComponent），
     // FunctionComponent 等没有 stateNode 的跳过
-    if(finishedWork.stateNode&&finishedWork.tag==HostComponent){
+    if(finishedWork.stateNode&&isHost(finishedWork)){
         // finishedWork 对应的真实 DOM 节点
         const domNode=finishedWork.stateNode;
         // 向上查找最近的有 DOM 节点的祖先 Fiber（HostComponent 或 HostRoot）
@@ -126,6 +127,12 @@ function commitPlacement(finishedWork:Fiber){
         }
         // 将当前 DOM 节点挂载到父 DOM 下，完成 DOM 树的构建
         parentDom.appendChild(domNode);
+    }else{
+        let kid=finishedWork.child;
+        while (kid!==null){
+            commitPlacement(kid)
+            kid=kid.sibling;
+        }
     }
 }
 

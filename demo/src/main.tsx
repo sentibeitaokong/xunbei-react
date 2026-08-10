@@ -3,12 +3,14 @@
 // import {  useReducer } from "react";
 import {
     ReactDOM,
+    Fragment
     // Component,
     // useReducer,
     // useState,
     // useEffect,
     // useLayoutEffect,
 } from "../which-react";
+
 
 import "./index.css";
 
@@ -70,16 +72,31 @@ import "./index.css";
 //   }
 // }
 
-// function FragmentComponent() {
-//   return (
-//     <ul>
-//       <>
-//         <li>part1</li>
-//         <li>part2</li>
-//       </>
-//     </ul>
-//   );
-// }
+function FragmentComponent() {
+  return (
+    <ul>
+      <>
+        <li>part1</li>
+        <li>part2</li>
+      </>
+    </ul>
+  );
+}
+let fragment=(
+    <>
+        <>
+            <h1>2222</h1>
+        </>
+        <li>part1</li>
+        <li>part2</li>
+    </>
+)
+let fragment1=(
+    <Fragment key='sy'>
+        <h3>1</h3>
+        <h4>2</h4>
+    </Fragment>
+)
 
 const jsx = (
     // <div className="border">
@@ -87,10 +104,14 @@ const jsx = (
     //     <a href="https://github.com/bubucuo/mini-react">mini react</a>
     //     {/* <FunctionComponent name="函数组件" /> */}
     //     {/* <ClassComponent name="类组件" /> */}
-    //     {/* <FragmentComponent /> */}
+    // <FragmentComponent />
+
     // </div>
     <div className="box border">
+        {fragment1}
         <h1 className="border">omg</h1>
+        <h1>react</h1>
+        123
     </div>
 );
 

@@ -3,8 +3,9 @@
 import type {Fiber} from "./ReactInternalTypes";
 import {REACT_ELEMENT_TYPE} from 'shared/ReactSymbols'
 import type {ReactElement} from 'shared/ReactTypes'
-import {createFiberFromElement} from "./ReactFiber";
+import {createFiberFromElement, createFiberFromText} from "./ReactFiber";
 import {Placement} from "./ReactFiberFlags";
+import {isArray} from 'shared/utils'
 
 type ChildReconciler = (
     returnFiber: Fiber,
@@ -27,7 +28,16 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
         }
         return newFiber;
     }
-
+    //协调单个文本节点
+    function reconcileSingleTextNode(
+        returnFiber: Fiber,
+        currentFirstChild: Fiber | null,
+        textContent: string,
+    ){
+        let createdFiber = createFiberFromText(textContent);
+        createdFiber.return = returnFiber;
+        return createdFiber;
+    }
     // 协调单个 ReactElement：创建 Fiber 并设置 return 指针
     function reconcileSingleElement(
         returnFiber: Fiber,
@@ -38,13 +48,76 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
         createdFiber.return = returnFiber;
         return createdFiber;
     }
-
+    //多个子节点创建FIber节点
+    function createChild(
+        returnFiber: Fiber,
+        newChild: any
+    ):Fiber|null{
+        //单个文本节点
+        if(isText(newChild)){
+            let createdFiber = createFiberFromText(newChild+'');
+            createdFiber.return = returnFiber;
+            return createdFiber;
+        }
+        if (typeof newChild === 'object' && newChild !== null) {
+            switch (newChild.$$typeof) {
+                case REACT_ELEMENT_TYPE: {
+                    const createdFiber = createFiberFromElement(newChild);
+                    createdFiber.return = returnFiber;
+                    return createdFiber;
+                }
+            }
+        }
+        return null;
+    }
+    //协调多个子节点
+    function reconcileChildArray(
+        returnFiber: Fiber,
+        currentFirstChild: Fiber | null,
+        newChildren: Array<any>,
+    ){
+        //头节点
+        let resultFirstChild:Fiber | null=null;
+        let previousNewFiber:Fiber | null=null;
+        //初次渲染没有老节点
+        let oldFiber=currentFirstChild;
+        let newIndex=0
+        if(oldFiber===null){
+            for(;newIndex<newChildren.length;newIndex++){
+                const newFiber=createChild(returnFiber,newChildren[newIndex])
+                if(newFiber==null){
+                    continue;
+                }
+                //记录FIber节点下标，更新阶段有助于Diff算法
+                newFiber.index=newIndex
+                if(previousNewFiber===null){
+                    resultFirstChild=newFiber
+                }else{
+                    previousNewFiber.sibling=newFiber
+                }
+                previousNewFiber=newFiber
+            }
+            return resultFirstChild
+        }
+        return resultFirstChild;
+    }
+    function isText(newChild:any){
+        return (
+            (typeof newChild==='string'&&newChild!=='')||
+                (typeof newChild==='number')
+        )
+    }
     // 派发 newChild 到对应的协调函数（按类型：单个元素 / 文本 / 数组）
     function reconcileChildFibers(
         returnFiber: Fiber,
         currentFirstChild: Fiber | null,
         newChild: any,
     ) {
+        //单个文本节点
+        if(isText(newChild)){
+            return placeSingleChild(reconcileSingleTextNode(returnFiber, currentFirstChild, newChild+''))
+        }
+        //单个React Element子节点
         if (typeof newChild === 'object' && newChild !== null) {
             switch (newChild.$$typeof) {
                 case REACT_ELEMENT_TYPE: {
@@ -53,6 +126,10 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
                     )
                 }
             }
+        }
+        //子节点是数组
+        if(isArray(newChild)){
+            return reconcileChildArray(returnFiber, currentFirstChild, newChild)
         }
         // TODO: 支持文本节点和数组子节点
         return null

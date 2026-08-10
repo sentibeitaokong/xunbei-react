@@ -1,6 +1,8 @@
 import type {Fiber} from "./ReactInternalTypes";
+import {HostText,Fragment} from "./ReactWorkTags";
 import type {WorkTag} from "./ReactWorkTags";
 import {IndeterminateComponent, HostComponent} from "./ReactWorkTags";
+import {REACT_FRAGMENT_TYPE} from 'shared/ReactSymbols'
 import {NoFlags} from "./ReactFiberFlags";
 import type {ReactElement} from 'shared/ReactTypes'
 import {isStr} from 'shared/utils'
@@ -121,6 +123,8 @@ export function createFiberFormTypeAndProps(
     // 如果 type 是字符串，说明是原生 DOM 标签（如 'div', 'span', 'p' 等）
     if (isStr(type)) {
         fiberTag = HostComponent
+    }else if(type==REACT_FRAGMENT_TYPE){
+        fiberTag=Fragment
     }
 
     const fiber = createFiber(fiberTag, pendingProps, key)
@@ -181,5 +185,10 @@ export function createWorkInProgress(current: Fiber, pendingProps: any): Fiber {
     workInProgress.index = current.index;
 
     return workInProgress;
+}
+
+export function createFiberFromText(content:string):Fiber{
+    const fiber=createFiber(HostText,content,null)
+    return fiber
 }
 

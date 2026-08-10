@@ -15,7 +15,7 @@
  */
 
 import type {Fiber} from "./ReactInternalTypes";
-import {HostComponent, HostRoot} from "./ReactWorkTags";
+import {HostComponent, HostRoot, HostText,Fragment} from "./ReactWorkTags";
 import {isStr,isNum} from "shared/utils"
 
 /**
@@ -38,7 +38,11 @@ export function completeWork(
     current: Fiber | null,
     workInProgress: Fiber
 ): Fiber | null {
+    const newProps=workInProgress.pendingProps
     switch(workInProgress.tag) {
+        case Fragment:{
+            return null
+        }
         case HostRoot:{
             // 根 Fiber 没有对应的 DOM 节点，直接返回 null 继续向上回溯
             return null
@@ -49,12 +53,16 @@ export function completeWork(
             // 1. 创建真实的 DOM 节点：document.createElement('div')
             const instance=document.createElement(type);
             // 2. 初始化 DOM 属性：children 设为 textContent，其他属性直接赋值
-            finalizeInitialChildren(instance,workInProgress.pendingProps)
+            finalizeInitialChildren(instance,newProps)
             // 3. 将所有子 Fiber 对应的真实 DOM 挂载到当前 DOM 上
             //    通过递归遍历 child → sibling 链表，收集所有后代 DOM 节点
             appendAllChildren(instance,workInProgress)
             // 将创建好的 DOM 节点关联到 Fiber.stateNode，供 commit 阶段使用
             workInProgress.stateNode=instance
+            return null
+        }
+        case HostText:{
+            workInProgress.stateNode=document.createTextNode(newProps)
             return null
         }
     }
@@ -107,8 +115,27 @@ function finalizeInitialChildren(domElement:Element,props:any){
  * @param workInProgress - 当前 Fiber 节点（需要将其子 DOM 挂载到 parent 下）
  */
 function appendAllChildren(parent:Element,workInProgress:Fiber){
-    let nodeFiber=workInProgress.child
-    if(nodeFiber){
-        parent.appendChild(nodeFiber.stateNode)
+    let nodeFiber=workInProgress.child  //链表结构
+    while(nodeFiber!==null){
+        if(isHost(nodeFiber)){
+            parent.appendChild(nodeFiber.stateNode)
+        }else if(nodeFiber.child!==null){
+            nodeFiber=nodeFiber.child
+            continue
+        }
+        if(nodeFiber===workInProgress){
+            return
+        }
+        while (nodeFiber.sibling===null){
+            if(nodeFiber.return===null||nodeFiber.return===workInProgress){
+                return
+            }
+            nodeFiber=nodeFiber.return
+        }
+        nodeFiber=nodeFiber.sibling
     }
+}
+
+export function isHost(fiber:Fiber):boolean{
+    return fiber.tag===HostComponent||fiber.tag===HostText
 }
