@@ -168,7 +168,7 @@ export type Container = Element | Document | DocumentFragment
  */
 export type FiberRoot = {
     /** 真实的 DOM 容器节点（通常是 <div id="root"></div>） */
-    container: Container;
+    containerInfo: Container;
     /** 指向当前 Fiber 树的根节点（HostRoot Fiber，tag=3） */
     current: Fiber;
     /**

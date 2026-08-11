@@ -121,9 +121,9 @@ function commitPlacement(finishedWork:Fiber){
         let parentDom=parentFiber.stateNode
         // 如果父 Fiber 是 HostRoot，其 stateNode 是 FiberRoot 对象
         // 真实的容器 DOM（如 <div id="root">）在 FiberRoot.container 中
-        if(parentDom.container){
+        if(parentDom.containerInfo){
             //HostRoot
-            parentDom=parentDom.container;
+            parentDom=parentDom.containerInfo;
         }
         // 将当前 DOM 节点挂载到父 DOM 下，完成 DOM 树的构建
         parentDom.appendChild(domNode);

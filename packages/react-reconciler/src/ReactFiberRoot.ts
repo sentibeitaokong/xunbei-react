@@ -34,14 +34,14 @@ export function createFiberRoot(containerInfo: Container): FiberRoot {
  * FiberRoot 节点的构造函数（内部使用）
  *
  * FiberRoot 是连接 React 和真实 DOM 的桥梁：
- * - container: 真实的 DOM 容器节点
+ * - containerInfo: 真实的 DOM 容器节点
  * - current: 指向当前页面显示的 Fiber 树（current tree）
  * - finishedWork: 指向构建完成、等待 commit 的 Fiber 树（workInProgress tree）
  *
  * @param containerInfo - 真实的 DOM 容器元素
  */
 export function FiberRootNode(containerInfo: Container) {
-    this.container = containerInfo;    // 真实 DOM 容器（如 <div id="root">）
+    this.containerInfo = containerInfo;    // 真实 DOM 容器（如 <div id="root">）
     this.current = null;               // 指向当前 Fiber 树的根节点（HostRoot Fiber）
     this.finishedWork = null;          // 指向构建完成的新 Fiber 树，commit 阶段将其渲染到 DOM
 }
