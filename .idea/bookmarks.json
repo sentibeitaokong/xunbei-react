@@ -2,25 +2,25 @@
   "1.组件调度": [
     {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 2005,
+      "linenumber": 2004,
       "name": "6. 初始化工作栈",
       "bookmarkType": "DEFAULT"
     },
     {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberRootScheduler.js",
-      "linenumber": 650,
+      "linenumber": 648,
       "name": "10. 注册微任务",
       "bookmarkType": "DEFAULT"
     },
     {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberRootScheduler.js",
-      "linenumber": 513,
+      "linenumber": 512,
       "name": "12. 进入render阶段",
       "bookmarkType": "DEFAULT"
     },
     {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberRootScheduler.js",
-      "linenumber": 384,
+      "linenumber": 383,
       "name": "11.清算中心-计算任务优先级进行调度",
       "bookmarkType": "DEFAULT"
     },
@@ -89,6 +89,78 @@
   ],
   "1.组件渲染": [
     {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitWork.js",
+      "linenumber": 2080,
+      "name": "13. 深度优先遍历节点的副作用",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitWork.js",
+      "linenumber": 2081,
+      "name": "14. 遍历当前节点的副作用",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 3898,
+      "name": "11. DOM 修改（挂载）",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 3899,
+      "name": "12. DOM 修改后",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 3855,
+      "name": "10. Dom修改前",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 3706,
+      "name": "9. commit阶段入口函数",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 3349,
+      "name": "4. 组件树完整渲染",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 2752,
+      "name": "2. 循环遍历执行渲染",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 2604,
+      "name": "1. render阶段入口函数（不使用时间切片）",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
+      "linenumber": 1401,
+      "name": "8. 渲染完成函数",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
+      "linenumber": 4187,
+      "name": "3. 组件渲染核心beginWork",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
+      "linenumber": 3787,
+      "name": "5. 复用子节点",
+      "bookmarkType": "DEFAULT"
+    },
+    {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitHostEffects.js",
       "linenumber": 386,
       "name": "16. 插入真实dom节点",
@@ -98,78 +170,6 @@
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitHostEffects.js",
       "linenumber": 498,
       "name": "15. 执行节点插入操作",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitWork.js",
-      "linenumber": 2080,
-      "name": "14. 遍历当前节点的副作用",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitWork.js",
-      "linenumber": 2079,
-      "name": "13. 深度优先遍历节点的副作用",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 3900,
-      "name": "12. DOM 修改后",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 3899,
-      "name": "11. DOM 修改（挂载）",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 3856,
-      "name": "10. Dom修改前",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 3707,
-      "name": "9. commit阶段入口函数",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 1402,
-      "name": "8. 渲染完成函数",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 3350,
-      "name": "4. 组件树完整渲染",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 2754,
-      "name": "2. 循环遍历执行渲染",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberWorkLoop.js",
-      "linenumber": 2605,
-      "name": "1. render阶段入口函数（不使用时间切片）",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
-      "linenumber": 4188,
-      "name": "3. 组件渲染核心beginWork",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
-      "linenumber": 3788,
-      "name": "5. 复用子节点",
       "bookmarkType": "DEFAULT"
     },
     {

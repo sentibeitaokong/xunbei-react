@@ -154,6 +154,7 @@ function prepareFreshStack(root: FiberRoot): Fiber {
  */
 function wookLoopSync() {
     while (workInProgress !== null) {
+        debugger
         performUnitOfWork(workInProgress);
     }
 }

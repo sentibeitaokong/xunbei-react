@@ -15,7 +15,7 @@
  */
 
 import type {Fiber} from "./ReactInternalTypes";
-import {HostComponent, HostRoot, HostText,Fragment} from "./ReactWorkTags";
+import {HostComponent, HostRoot, HostText, Fragment, ClassComponent, FunctionComponent} from "./ReactWorkTags";
 import {isStr,isNum} from "shared/utils"
 
 /**
@@ -40,9 +40,9 @@ export function completeWork(
 ): Fiber | null {
     const newProps=workInProgress.pendingProps
     switch(workInProgress.tag) {
-        case Fragment:{
-            return null
-        }
+        case Fragment:
+        case ClassComponent:
+        case FunctionComponent:
         case HostRoot:{
             // 根 Fiber 没有对应的 DOM 节点，直接返回 null 继续向上回溯
             return null

@@ -1,11 +1,11 @@
 import type {Fiber} from "./ReactInternalTypes";
-import {HostText,Fragment} from "./ReactWorkTags";
+import {HostText, Fragment, ClassComponent, FunctionComponent} from "./ReactWorkTags";
 import type {WorkTag} from "./ReactWorkTags";
 import {IndeterminateComponent, HostComponent} from "./ReactWorkTags";
 import {REACT_FRAGMENT_TYPE} from 'shared/ReactSymbols'
 import {NoFlags} from "./ReactFiberFlags";
 import type {ReactElement} from 'shared/ReactTypes'
-import {isStr} from 'shared/utils'
+import {isStr,isFn} from 'shared/utils'
 
 /**
  * 创建一个新的 Fiber 节点
@@ -120,8 +120,15 @@ export function createFiberFormTypeAndProps(
     // 默认标记为待确定类型（IndeterminateComponent），后续根据实际情况在 reconcile 阶段确定
     let fiberTag: WorkTag = IndeterminateComponent;
 
-    // 如果 type 是字符串，说明是原生 DOM 标签（如 'div', 'span', 'p' 等）
-    if (isStr(type)) {
+    if(isFn(type)){
+        //类组件 函数组件
+        if(type.prototype.isReactComponent){
+            fiberTag=ClassComponent
+        }else{
+            fiberTag=FunctionComponent
+        }
+    }else if (isStr(type)) {
+        // 如果 type 是字符串，说明是原生 DOM 标签（如 'div', 'span', 'p' 等）
         fiberTag = HostComponent
     }else if(type==REACT_FRAGMENT_TYPE){
         fiberTag=Fragment

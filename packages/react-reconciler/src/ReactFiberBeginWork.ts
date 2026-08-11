@@ -1,7 +1,7 @@
 // beginWork —— Fiber 树构建的"递"阶段
 
 import type {Fiber} from "./ReactInternalTypes";
-import {HostRoot, HostComponent, HostText,Fragment} from "./ReactWorkTags";
+import {HostRoot, HostComponent, HostText, Fragment, ClassComponent, FunctionComponent} from "./ReactWorkTags";
 import {mountChildFibers, reconcileChildFibers} from "./ReactChildFiber";
 import {shouldSetTextContent} from '../../react-dom/client/ReactDOMHostConfig'
 
@@ -19,6 +19,10 @@ export function beginWork(
             return updateHostText(current, workInProgress);
         case Fragment:
             return updateHostFragment(current,workInProgress)
+        case ClassComponent:
+            return updateClassComponent(current,workInProgress)
+        case FunctionComponent:
+            return updateFunctionComponent(current,workInProgress)
     }
     throw new Error(
         `Unknown unit of work tag (${workInProgress.tag}). This error is likely caused by a bug in ` +
@@ -62,7 +66,21 @@ function updateHostFragment(current: Fiber | null, workInProgress: Fiber) {
     reconcileChildren(current, workInProgress, nextChildren);
     return workInProgress.child
 }
-
+//处理类组件 更新自己 协调子节点
+function updateClassComponent(current: Fiber | null, workInProgress: Fiber){
+    const {type, pendingProps} = workInProgress;
+    const instance=new type(pendingProps)
+    const children=instance.render()
+    reconcileChildren(current,workInProgress,children)
+    return workInProgress.child
+}
+//处理函数组件
+function updateFunctionComponent(current: Fiber | null, workInProgress: Fiber){
+    const {type, pendingProps} = workInProgress;
+    const children=type(pendingProps)
+    reconcileChildren(current,workInProgress,children)
+    return workInProgress.child
+}
 // 协调子节点：根据是否存在 current 选择 mount 或 reconcile 策略
 function reconcileChildren(current: Fiber | null, workInProgress: Fiber, nextChildren: any) {
     if (current === null) {

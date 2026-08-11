@@ -3,8 +3,8 @@
 // import {  useReducer } from "react";
 import {
     ReactDOM,
-    Fragment
-    // Component,
+    Fragment,
+    Component,
     // useReducer,
     // useState,
     // useEffect,
@@ -60,17 +60,24 @@ import "./index.css";
 //   );
 // }
 
-// class ClassComponent extends Component {
+class ClassComponent extends Component<any,any> {
+  render() {
+    return (
+      <div className="border">
+        <h3>{this.props.name}</h3>
+        我是文本
+      </div>
+    );
+  }
+}
 
-//   render() {
-//     return (
-//       <div className="border">
-//         <h3>{this.props.name}</h3>
-//         我是文本
-//       </div>
-//     );
-//   }
-// }
+function FunctionComponent(props:any){
+    return (
+        <div>
+            <h3>{props.name}</h3>
+        </div>
+    )
+}
 
 function FragmentComponent() {
   return (
@@ -108,10 +115,12 @@ const jsx = (
 
     // </div>
     <div className="box border">
-        {fragment1}
+        {/*{fragment1}*/}
         <h1 className="border">omg</h1>
         <h1>react</h1>
         123
+        <ClassComponent name="类组件" />
+        <FunctionComponent name="函数组件" />
     </div>
 );
 
