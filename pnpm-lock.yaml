@@ -17,6 +17,9 @@ importers:
 
   packages/react:
     dependencies:
+      react-reconciler:
+        specifier: workspace:*
+        version: link:../react-reconciler
       shared:
         specifier: workspace:*
         version: link:../shared

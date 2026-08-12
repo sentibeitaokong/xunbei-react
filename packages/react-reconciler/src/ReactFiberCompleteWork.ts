@@ -50,15 +50,21 @@ export function completeWork(
         case HostComponent:{
             // 原生 DOM 标签（如 div、span、p），type 就是标签名字符串
             const {type} = workInProgress;
-            // 1. 创建真实的 DOM 节点：document.createElement('div')
-            const instance=document.createElement(type);
-            // 2. 初始化 DOM 属性：children 设为 textContent，其他属性直接赋值
-            finalizeInitialChildren(instance,newProps)
-            // 3. 将所有子 Fiber 对应的真实 DOM 挂载到当前 DOM 上
-            //    通过递归遍历 child → sibling 链表，收集所有后代 DOM 节点
-            appendAllChildren(instance,workInProgress)
-            // 将创建好的 DOM 节点关联到 Fiber.stateNode，供 commit 阶段使用
-            workInProgress.stateNode=instance
+            if(current!==null&&workInProgress.stateNode!=null){
+                //update
+                updateHostComponent(current,workInProgress,type,newProps)
+            }else{
+                //mount
+                // 1. 创建真实的 DOM 节点：document.createElement('div')
+                const instance=document.createElement(type);
+                // 2. 初始化 DOM 属性：children 设为 textContent，其他属性直接赋值
+                finalizeInitialChildren(instance,null,newProps)
+                // 3. 将所有子 Fiber 对应的真实 DOM 挂载到当前 DOM 上
+                //    通过递归遍历 child → sibling 链表，收集所有后代 DOM 节点
+                appendAllChildren(instance,workInProgress)
+                // 将创建好的 DOM 节点关联到 Fiber.stateNode，供 commit 阶段使用
+                workInProgress.stateNode=instance
+            }
             return null
         }
         case HostText:{
@@ -69,6 +75,21 @@ export function completeWork(
     throw new Error(
         `Unknown unit of work tag (${workInProgress.tag}). This error is likely caused by a bug in ` +
         'React. Please file an issue.',
+    );
+}
+function updateHostComponent(
+    current: Fiber | null,
+    workInProgress: Fiber,
+    type:string,
+    newProps:any,
+){
+    if(current?.memoizedProps===newProps){
+        return
+    }
+    finalizeInitialChildren(
+        workInProgress.stateNode as Element,
+        current?.memoizedProps,
+        newProps
     );
 }
 
@@ -85,17 +106,40 @@ export function completeWork(
  * @param domElement - 需要初始化的真实 DOM 元素
  * @param props      - Fiber 的 pendingProps（即将应用的属性）
  */
-function finalizeInitialChildren(domElement:Element,props:any){
-    for(const propKey in props){
-        const nextProp = props[propKey];
+function finalizeInitialChildren(domElement:Element,prevProps:any,nextProps:any){
+    //遍历老的props
+    for(const propKey in prevProps){
+        const prevProp = prevProps[propKey];
+        if(propKey==='children'){
+            if(isStr(prevProp)||isNum(prevProp)){
+                (domElement as any).textContent='';
+            }
+        }else{
+            // 将其他属性直接赋值到 DOM 元素上
+            if(propKey==='onClick'){
+                domElement.removeEventListener("click", prevProp);
+            }else{
+                if(!(prevProp in nextProps)){
+                    (domElement as any)[propKey]='';
+                }
+            }
+
+        }
+    }
+    //遍历新的props
+    for(const propKey in nextProps){
+        const nextProp = nextProps[propKey];
         if(propKey==='children'){
             // children 是字符串/数字时，直接设置为文本内容
             // 复杂 children（数组/Fiber）已在 JSX 编译时展开为 Fiber 树，此处不会出现
             if(isStr(nextProp)||isNum(nextProp)){
-                (domElement as any).textContent=nextProp;
+                (domElement as any).textContent=nextProp+'';
             }
         }else{
             // 将其他属性直接赋值到 DOM 元素上
+            if(propKey==='onClick'){
+                domElement.addEventListener("click", nextProp);
+            }
             // 简化处理：实际 React 会区分 className→class、事件绑定、style 对象等
             (domElement as any)[propKey]=nextProp;
         }

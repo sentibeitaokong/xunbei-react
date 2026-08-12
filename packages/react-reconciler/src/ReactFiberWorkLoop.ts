@@ -138,7 +138,9 @@ function prepareFreshStack(root: FiberRoot): Fiber {
     workProgressRoot = root;
     // 从根节点的 current 创建 workInProgress（双缓冲机制）
     const rootWorkInProgress = createWorkInProgress(root.current, null)
-    workInProgress = rootWorkInProgress;
+    if(workInProgress===null){
+        workInProgress = rootWorkInProgress;
+    }
     return rootWorkInProgress
 }
 
@@ -178,6 +180,8 @@ function performUnitOfWork(unitOfWork: Fiber) {
     const current = unitOfWork.alternate;
     // 1. beginWork："递"阶段 —— 处理当前节点，返回子节点
     let next = beginWork(current, unitOfWork)
+    // ! 把pendingProps更新到memoizedProps上
+    unitOfWork.memoizedProps=unitOfWork.pendingProps
     if (next === null) {
         // 无子节点 → 进入"归"阶段：completeWork 当前节点，向上回溯
         completeUnitOfWork(unitOfWork)
