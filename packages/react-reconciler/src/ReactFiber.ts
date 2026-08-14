@@ -72,7 +72,7 @@ function FiberNode(tag: WorkTag, pendingProps: unknown, key: null | string) {
 
     // 以下字段暂时注释，后续功能实现时启用：
     // this.subtreeFlags = NoFlags;     // 子树中所有 Fiber 的副作用标记汇总
-    // this.deletions = null;           // 需要被删除的子节点列表
+    this.deletions = null;           // 需要被删除的子节点列表
     // this.lanes = NoLanes;            // 当前 Fiber 的优先级车道（lane 模型）
     // this.childLanes = NoLanes;       // 子树中存在的优先级车道
 

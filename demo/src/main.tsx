@@ -52,7 +52,7 @@ function FunctionComponent(props: {name: string}) {
     // useReducer 返回 [state, dispatch]
     // reducer: (x) => x + 1   —— 每次 dispatch 时状态 +1
     // initialArg: 0            —— 初始状态值
-    const [count, setCount] = useReducer((x) => x + 1, 0);
+    const [count, setCount] = useReducer((x) => x + 1, 2);
 
     // 以下是 useState 和 useEffect 的预留位置（尚未实现）：
     // const [count2, setCount2] = useState(0);
@@ -66,26 +66,34 @@ function FunctionComponent(props: {name: string}) {
     return (
         <div className="border">
             {/* <p>{props.name}</p> */}
-            {/* <button onClick={() => setCount()}>{count}</button> */}
+             <button onClick={() => setCount()}>{count}</button>
 
             {/* 点击按钮 → dispatch → reducer 计算新状态 → 调度更新 → 重新渲染 */}
-            <button
-                onClick={() => {
-                    setCount(count + 1);
-                }}>
-                {count}
-            </button>
+            {/*{*/}
+            {/*    count%2===0?(*/}
+            {/*        <button*/}
+            {/*            onClick={() => {*/}
+            {/*                setCount(count + 1);*/}
+            {/*            }}>*/}
+            {/*            {count}*/}
+            {/*        </button>*/}
+            {/*    ):(*/}
+            {/*      <span  onClick={() => {*/}
+            {/*          setCount(count + 1);*/}
+            {/*      }}>react</span>*/}
+            {/*    )*/}
+            {/*}*/}
 
             {/* 条件渲染示例（注释掉）：根据 count 奇偶性切换标签类型 */}
             {/* {count % 2 ? <div>omg</div> : <span>123</span>} */}
 
             {/* Diff 算法示例（注释掉）：展示 key 在列表 Diff 中的作用
                 当 count2 === 2 时切换数组顺序，触发节点的移动/复用 */}
-            {/* <ul> */}
-            {/*   {count2 === 2 */}
-            {/*     ? [2, 1, 3, 4].map((item) => <li key={item}>{item}</li>) */}
-            {/*     : [0, 1, 2, 3, 4].map((item) => <li key={item}>{item}</li>)} */}
-            {/* </ul> */}
+             <ul>
+               {count %2==0
+                 ? [0, 1, 2, 3].map((item) => <li key={item}>{item}</li>)
+                 : [0, 1, 2, 3, 4].map((item) => <li key={item}>{item}</li>)}
+             </ul>
         </div>
     );
 }

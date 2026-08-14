@@ -16,7 +16,7 @@
  */
 
 import type {FiberRoot,Fiber} from "./ReactInternalTypes";
-import {Placement} from "./ReactFiberFlags";
+import {ChildDeletion, Placement} from "./ReactFiberFlags";
 import {HostComponent, HostRoot} from "./ReactWorkTags";
 import {isHost} from "./ReactFiberCompleteWork";
 
@@ -92,7 +92,33 @@ function commitReconciliationEffects(finishedWork:Fiber){
         // 页面初次渲染，或节点位置发生变化时，执行插入操作
         commitPlacement(finishedWork);
         // 清除 Placement 标记（位取反后位与）：flags = flags & ~Placement
-        finishedWork.flags=~Placement
+        finishedWork.flags&=~Placement;
+    }
+    if(flags&ChildDeletion){
+        const parentFiber=isHostParent(finishedWork)?finishedWork:getHostParenFiber(finishedWork);
+        const parentDom=parentFiber.stateNode
+        commitDeletions(finishedWork.deletions,parentDom);
+        finishedWork.flags&=~ChildDeletion;
+        finishedWork.deletions=null
+    }
+}
+
+function commitDeletions(
+    deletions:Array<Fiber>,
+    parentDom:Element|Document|DocumentFragment
+){
+    deletions.forEach(deletion=>{
+        parentDom.removeChild(getStateNode(deletion))
+    })
+}
+
+function getStateNode(fiber:Fiber){
+    let node =fiber;
+    while(1){
+        if(isHost(node)&&node.stateNode){
+            return node.stateNode;
+        }
+        node=node.child as Fiber;
     }
 }
 

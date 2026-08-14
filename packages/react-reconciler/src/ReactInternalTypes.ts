@@ -130,7 +130,7 @@ export type Fiber = {
 
     // 以下字段暂未启用，后续功能实现时使用：
     // subtreeFlags: Flags;          // 子树中所有节点的副作用标记汇总（冒泡机制）
-    // deletions: Array<Fiber> | null; // 需要被删除的子节点列表
+    deletions: Array<Fiber> | null; // 需要被删除的子节点列表
     // lanes: Lanes;                 // 当前 Fiber 的优先级车道
     // childLanes: Lanes;            // 子树中存在的优先级车道
 
