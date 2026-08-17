@@ -15,6 +15,7 @@
  * - Fragment   ← shared/ReactSymbols（React.Fragment 的 symbol 标识）
  * - Component  ← react/src/ReactBaseClasses（类组件的基类）
  * - useReducer ← react-reconciler/src/ReactFiberHooks（Hook 实现）
+ * - useState   ← react-reconciler/src/ReactFiberHooks（基于 useReducer 实现）
  */
 
 // 以下是使用真实 React 时的导入方式（注释掉作为参考）：
@@ -22,7 +23,7 @@
 // import ReactDOM from "react-dom/client";
 // import { Component, useReducer, useState, useEffect, useLayoutEffect } from "../packages/react/src";
 
-import {Fragment, Component, useReducer} from '../packages/react/src/index.ts'
+import {Fragment, Component, useReducer,useState} from '../packages/react/src/index.ts'
 import ReactDOM from "../packages/react-dom/client/ReactDomRoot.ts";
 
 export {
@@ -30,7 +31,7 @@ export {
     Fragment,
     Component,
     useReducer,
-    // useState,
+    useState,
     // useEffect,
     // useLayoutEffect
 };

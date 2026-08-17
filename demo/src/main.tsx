@@ -23,7 +23,7 @@ import {
     Fragment,
     Component,
     useReducer,
-    // useState,
+    useState,
     // useEffect,
     // useLayoutEffect,
 } from "../which-react";
@@ -54,8 +54,10 @@ function FunctionComponent(props: {name: string}) {
     // initialArg: 0            —— 初始状态值
     const [count, setCount] = useReducer((x) => x + 1, 2);
 
-    // 以下是 useState 和 useEffect 的预留位置（尚未实现）：
-    // const [count2, setCount2] = useState(0);
+    // useState 示例：基于 useReducer 实现（reducer 传 null），点击按钮时 count2 +1
+    // 注意：useState 与 useReducer 共用同一套 Hook 链表，两者按调用顺序依次入链
+    const [count2, setCount2] = useState(0);
+    // 以下是 useEffect 和 useLayoutEffect 的预留位置（尚未实现）：
     // useEffect(() => {
     //   console.log("omg useEffect", count2);
     // }, [count2]);
@@ -67,6 +69,13 @@ function FunctionComponent(props: {name: string}) {
         <div className="border">
             {/* <p>{props.name}</p> */}
              <button onClick={() => setCount()}>{count}</button>
+             <button onClick={() => setCount2(count2+1)}>{count2}</button>
+            {/* 以下三行用于验证协调阶段对「空值」子节点的处理：
+                null / undefined / boolean 都不渲染任何 DOM，
+                对应 reconcileChildFibers 中 return null 的分支 */}
+            {count%2===0?<h1>null</h1>:null}
+            {count%2===0?<h1>undefined</h1>:undefined}
+            {count%2===0&&<h1>boolean</h1>}
 
             {/* 点击按钮 → dispatch → reducer 计算新状态 → 调度更新 → 重新渲染 */}
             {/*{*/}
@@ -89,11 +98,11 @@ function FunctionComponent(props: {name: string}) {
 
             {/* Diff 算法示例（注释掉）：展示 key 在列表 Diff 中的作用
                 当 count2 === 2 时切换数组顺序，触发节点的移动/复用 */}
-             <ul>
-               {count %2==0
-                 ? [0, 1, 2, 3].map((item) => <li key={item}>{item}</li>)
-                 : [0, 1, 2, 3, 4].map((item) => <li key={item}>{item}</li>)}
-             </ul>
+             {/*<ul>*/}
+             {/*  {count %2==0*/}
+             {/*    ? [3,2,0,4,1].map((item) => <li key={item}>{item}</li>)*/}
+             {/*    : [0, 1, 2,3, 4].map((item) => <li key={item}>{item}</li>)}*/}
+             {/*</ul>*/}
         </div>
     );
 }

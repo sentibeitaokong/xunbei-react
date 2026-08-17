@@ -12,10 +12,10 @@
  *    - 用于在不额外创建 DOM 节点的情况下包裹多个子元素
  *    - JSX 中的 <>...</> 编译后就是 Fragment
  *
- * 2. useReducer
+ * 2. useReducer / useState
  *    - 对应 react-reconciler/src/ReactFiberHooks 中的实现
- *    - 通过 reducer 函数管理组件状态，是 useState 的底层实现
- *    - 返回 [state, dispatch] 元组
+ *    - useReducer 通过 reducer 函数管理组件状态，是 useState 的底层实现
+ *    - useState 是 useReducer 的语法糖（reducer 传 null），返回 [state, setState]
  *
  * 3. Component
  *    - 对应当前包的 ReactBaseClasses 模块
@@ -28,5 +28,5 @@
  */
 
 export {REACT_FRAGMENT_TYPE as Fragment} from "shared/ReactSymbols";
-export {useReducer} from 'react-reconciler/src/ReactFiberHooks'
+export {useReducer,useState} from 'react-reconciler/src/ReactFiberHooks'
 export {Component} from './ReactBaseClasses'

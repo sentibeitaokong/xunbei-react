@@ -15,9 +15,13 @@
  * - 单个 ReactElement → reconcileSingleElement（含节点复用逻辑）
  * - 数组 → reconcileChildArray（多个子节点）
  *
- * Diff 策略（简化版）：
+ * Diff 策略：
  * - 单节点 Diff：找到 key 和 type 都相同的节点就复用，其余删除
- * - 多节点 Diff：首次挂载时直接创建所有子节点（未实现完整的更新 Diff）
+ * - 多节点 Diff：分三步完成（见 reconcileChildArray）
+ *   1. 从左到右逐个比较，key/type 相同则复用（updateSlot），不同则退出本轮
+ *   2. 若只剩新节点则直接创建；若只剩老节点则删除剩余
+ *   3. 若新老节点都还有剩余，则将剩余老节点按 key/index 存入 Map，
+ *      再逐个匹配复用，最后删除 Map 中未被复用的老节点
  *
  * 在真实 React 中，Diff 算法有更多的优化策略：
  * - 双端比较（首首、尾尾、首尾、尾首）
@@ -285,12 +289,22 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
      *   <ul>{items.map(item => <li key={item}>{item}</li>)}</ul>
      * 这里 items.map(...) 返回的就是一个数组。
      *
-     * 当前实现只处理了首次挂载（oldFiber === null）的情况：
-     * - 遍历数组，为每个元素创建对应的 Fiber
-     * - 通过 sibling 指针将它们链接成单向链表
-     * - 记录每个 Fiber 的 index（在原数组中的位置，用于 Diff 算法的 key 对比）
+     * 这是「多节点 Diff」的核心实现，分三步完成：
      *
-     * TODO: 实现更新阶段的数组 Diff（新旧数组的节点复用/移动/删除）
+     * 【第一步】从左到右逐个比较（newIndex 从 0 开始）
+     *   - 调用 updateSlot 尝试复用：key 相同（文本节点看是否为文本）则复用，
+     *     不同则返回 null 并退出本轮循环。
+     *   - 复用的节点通过 placeChild 判断是否需要移动（index 顺序变化）。
+     *   - 构建新 Fiber 的 sibling 单向链表。
+     *
+     * 【第二步】处理单边剩余的情况
+     *   - 新节点遍历完了、老节点还有 → 删除所有剩余老节点（deleteRemainingChildren）
+     *   - 老节点遍历完了、新节点还有 → 直接为剩余新节点创建 Fiber（createChild）
+     *
+     * 【第三步】新老节点都还有剩余（中间有 key 不匹配导致提前退出）
+     *   - 把剩余老节点按 key（无 key 则按 index）存入 Map → mapRemainingChildren
+     *   - 逐个新节点从 Map 中查找匹配的老节点复用 → updateFromMap
+     *   - 复用过的老节点从 Map 中删除，最后 Map 中剩下的就是需要删除的节点
      *
      * @param returnFiber       - 父 Fiber
      * @param currentFirstChild - current 树上的第一个子节点
@@ -306,32 +320,46 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
         let resultFirstChild: Fiber | null = null;
         // 上一个创建的 Fiber（用于链接 sibling）
         let previousNewFiber: Fiber | null = null;
+        // 当前正在比较的老节点（从 current 树的第一个子节点开始）
         let oldFiber = currentFirstChild;
-        //下一个fiber
-        let nextOldFiber=null
+        // 下一个待比较的老节点（提前存好，避免 oldFiber 被覆盖后丢失）
+        let nextOldFiber = null;
+        // 新子节点数组的下标（从左到右递增）
         let newIndex = 0;
-        let lastPlaceIndex=0
-        // ! 1. 从左往右遍历，能复用则复用，不能复用，就退出本轮
-        for(;oldFiber!==null&&newIndex<newChildren.length;newIndex++){
-            if(oldFiber.index>newIndex){
-                nextOldFiber=oldFiber;
-                oldFiber=null
-            }else{
-                nextOldFiber=oldFiber.sibling
+        // 上一个复用节点在「老链表」中的位置，用于判断是否需要移动 DOM（见 placeChild）
+        let lastPlaceIndex = 0;
+
+        // ===== 第一步：从左到右逐个比较，能复用则复用，不能复用就退出本轮 =====
+        for (; oldFiber !== null && newIndex < newChildren.length; newIndex++) {
+            if (oldFiber.index > newIndex) {
+                // 老节点的 index 比新下标还靠后，说明中间有节点被删了，
+                // 老节点链表出现「跳跃」，无法直接对应，退出第一轮走 Map 匹配
+                nextOldFiber = oldFiber;
+                oldFiber = null;
+            } else {
+                // 正常情况下，保存 oldFiber 的兄弟节点作为下一个候选
+                nextOldFiber = oldFiber.sibling;
             }
-            const newFiber=updateSlot(returnFiber, oldFiber,newChildren[newIndex]);
-            if(newFiber===null){
-                oldFiber=nextOldFiber
-                break
+            // 尝试复用：key（文本节点则看类型）相同时返回复用后的 Fiber，否则返回 null
+            const newFiber = updateSlot(returnFiber, oldFiber, newChildren[newIndex]);
+            if (newFiber === null) {
+                // 无法复用 → 退出第一轮，进入第三步（Map 匹配）
+                if (oldFiber === null) {
+                    // 上面因为 index 跳跃把 oldFiber 置空了，这里恢复它
+                    oldFiber = nextOldFiber;
+                }
+                break;
             }
-            if(shouldTrackSideEffects){
-                if(oldFiber&&newFiber?.alternate===null){
+            if (shouldTrackSideEffects) {
+                // 复用了老节点（alternate 非 null），但 key 相同 type 不同导致新建了 Fiber
+                // （alternate === null）→ 老节点需要删除
+                if (oldFiber && newFiber?.alternate === null) {
                     deleteChild(returnFiber, oldFiber);
                 }
             }
 
-            //判断节点在dom的相对位置是否发生变化,变化了则需要移动
-            lastPlaceIndex=placeChild(newFiber,lastPlaceIndex,newIndex)
+            // 判断节点在 DOM 中的相对位置是否发生变化，变了就标记 Placement（需要移动）
+            lastPlaceIndex = placeChild(newFiber, lastPlaceIndex, newIndex);
 
             // 构建 sibling 链表
             if (previousNewFiber === null) {
@@ -342,16 +370,17 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
                 previousNewFiber.sibling = newFiber;
             }
             previousNewFiber = newFiber;
-
-            oldFiber=nextOldFiber
+            oldFiber = nextOldFiber;
         }
-        // ! 2.1 老节点还有，新节点没了，删除剩余的老节点
-        if(newIndex===newChildren.length){
-            deleteRemainingChildren(returnFiber,oldFiber);
+
+        // ===== 第二步 2.1：老节点还有、新节点没了 → 删除剩余的老节点 =====
+        if (newIndex === newChildren.length) {
+            deleteRemainingChildren(returnFiber, oldFiber);
             return resultFirstChild;
         }
-        // ! 2.2 新节点还有，老节点没了，剩下的新节点新增就可以了
-        // 首次渲染：没有老节点，直接为每个数组元素创建新 Fiber
+
+        // ===== 第二步 2.2：新节点还有、老节点没了 → 剩余的新节点直接创建 =====
+        // （首次渲染时 oldFiber 一开始就是 null，也走这里）
         if (oldFiber === null) {
             for (; newIndex < newChildren.length; newIndex++) {
                 const newFiber = createChild(returnFiber, newChildren[newIndex]);
@@ -376,91 +405,250 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
             }
             return resultFirstChild;
         }
+        // ===== 第三步 2.3：新老节点都还有剩余（第一轮因 key 不匹配提前退出）=====
+        // 把剩余老节点按 key（无 key 则按 index）建立 Map，便于 O(1) 查找复用
+        const existingChildren = mapRemainingChildren(oldFiber);
 
-        // TODO: 更新阶段的数组 Diff（此处为占位，当前直接返回 null）
+        for (; newIndex < newChildren.length; newIndex++) {
+            // 从 Map 中查找匹配的老节点复用（文本按 index，元素按 key）
+            const newFiber = updateFromMap(existingChildren, returnFiber, newIndex, newChildren[newIndex]);
+            if (newFiber !== null) {
+                if (shouldTrackSideEffects) {
+                    // 该老节点已被复用，从 Map 中移除，剩下的就是需要删除的节点
+                    existingChildren.delete(newFiber.key === null ? newIndex : newFiber.key);
+                }
+                lastPlaceIndex = placeChild(newFiber, lastPlaceIndex, newIndex);
+                // 构建 sibling 链表
+                if (previousNewFiber === null) {
+                    // 第一个有效子节点 → 作为链表头
+                    resultFirstChild = newFiber;
+                } else {
+                    // 后续节点 → 链接到上一个节点的 sibling
+                    previousNewFiber.sibling = newFiber;
+                }
+                previousNewFiber = newFiber;
+            }
+        }
+
+        // ===== 第四步：新节点已构建完，Map 中剩下的老节点都是多余的 → 删除 =====
+        if (shouldTrackSideEffects) {
+            existingChildren.forEach(child => deleteChild(returnFiber, child));
+        }
         return resultFirstChild;
     }
-    function placeChild(
-        newFiber:Fiber,
-        lastPlaceIndex:number,   //记录新fiber在老fiber上的位置
-        newIndex:number,
-    ){
-        newFiber.index=newIndex;
-        if(!shouldTrackSideEffects){
-            return lastPlaceIndex
-        }
-        //老fiber
-        const current=newFiber.alternate
-        if(current!==null){
-            const oldIndex=current.index;
-            if(oldIndex<lastPlaceIndex){
-                //需要移动位置
-                newFiber.flags|=Placement
-                return lastPlaceIndex;
-            }else{
-                return oldIndex
+
+    /**
+     * mapRemainingChildren —— 将剩余老节点按 key/index 存入 Map
+     *
+     * 在多节点 Diff 第三步使用：第一轮逐个比较因 key 不匹配而提前退出后，
+     * 剩余的 oldFiber 链表会被收集到 Map 中，以便新节点快速查找复用。
+     *
+     * Map 的 key 规则：
+     * - 老节点有 key → 用 key 作为 Map 的键（key 是节点的唯一标识）
+     * - 老节点无 key → 用 index 作为 Map 的键（无 key 时按位置匹配）
+     *
+     * @param oldFiber - 剩余老节点链表的头节点
+     * @returns key/index → Fiber 的映射表
+     */
+    function mapRemainingChildren(oldFiber: Fiber): Map<string | number, Fiber> {
+        const existingChildren: Map<string | number, Fiber> = new Map();
+        let existingChild: Fiber | null = oldFiber;
+        while (existingChild !== null) {
+            if (existingChild.key !== null) {
+                existingChildren.set(existingChild.key, existingChild);
+            } else {
+                existingChildren.set(existingChild.index, existingChild);
             }
-        }else{
-            //说明节点是新增节点
-            newFiber.flags|=Placement
-            return lastPlaceIndex
+            existingChild = existingChild.sibling;
+        }
+        return existingChildren;
+    }
+
+    /**
+     * updateFromMap —— 从 Map 中查找匹配的老节点并复用/创建新 Fiber
+     *
+     * 在多节点 Diff 第三步使用：根据新子节点的类型，从 existingChildren Map 中
+     * 取出对应的老节点，交给 updateTextNode / updateElement 完成复用或新建。
+     *
+     * 匹配规则：
+     * - 文本节点：以 index 为键查找老节点
+     * - ReactElement：以 key（无 key 则用 index）为键查找老节点
+     *
+     * @param existingChildren - 剩余老节点的 key/index → Fiber 映射表
+     * @param returnFiber      - 父 Fiber
+     * @param newIndex         - 新节点在当前数组中的位置
+     * @param newChild         - 新的子节点（文本或 ReactElement）
+     * @returns 复用或新建的 Fiber；无法处理（如 null/boolean）时返回 null
+     */
+    function updateFromMap(
+        existingChildren: Map<string | number, Fiber>,
+        returnFiber: Fiber,
+        newIndex: number,
+        newChild: any
+    ): Fiber | null {
+        if (isText(newChild)) {
+            // 文本节点无 key，只能按 index 匹配老节点
+            const matchedFiber = existingChildren.get(newIndex) || null;
+            return updateTextNode(returnFiber, matchedFiber, newChild + '');
+        } else if (typeof newChild === 'object' && newChild !== null) {
+            // ReactElement 优先按 key 匹配，无 key 时退回按 index 匹配
+            const matchedFiber = existingChildren.get(newChild.key === null ? newIndex : newChild.key) || null;
+            return updateElement(returnFiber, matchedFiber, newChild);
+        }
+        return null;
+    }
+
+    /**
+     * placeChild —— 标记节点是否需要移动（Placement），并维护 lastPlaceIndex
+     *
+     * 这是「移动而非删除重建」的关键：通过比较新 Fiber 复用到的老节点
+     * 在 oldChildren 中的 index 与 lastPlaceIndex 的大小关系，判断节点
+     * 在新链表中的相对顺序是否改变，进而决定是否需要移动 DOM。
+     *
+     * 判断逻辑：
+     * - 无副作用跟踪（mount）：只更新 index，直接返回原 lastPlaceIndex
+     * - 复用节点（alternate 非 null）：
+     *     oldIndex < lastPlaceIndex → 顺序变了，标记 Placement，lastPlaceIndex 不变
+     *     oldIndex >= lastPlaceIndex → 顺序没变，返回 oldIndex（更新 lastPlaceIndex）
+     * - 新增节点（alternate 为 null）：标记 Placement，lastPlaceIndex 不变
+     *
+     * @param newFiber       - 当前处理的新 Fiber
+     * @param lastPlaceIndex - 上一个复用节点在老链表中的 index（单调不降）
+     * @param newIndex       - 新节点在数组中的位置
+     * @returns 更新后的 lastPlaceIndex
+     */
+    function placeChild(
+        newFiber: Fiber,
+        lastPlaceIndex: number,
+        newIndex: number,
+    ) {
+        // 记录新节点在数组中的位置，供后续对比使用
+        newFiber.index = newIndex;
+
+        // 首次挂载（mount）不标记 Placement，整棵树一次性插入即可
+        if (!shouldTrackSideEffects) {
+            return lastPlaceIndex;
+        }
+
+        // 老节点（current 树上对应的 Fiber）
+        const current = newFiber.alternate;
+        if (current !== null) {
+            // 复用节点 → 根据老 index 判断相对顺序是否变化
+            const oldIndex = current.index;
+            if (oldIndex < lastPlaceIndex) {
+                // 老位置在 lastPlaceIndex 之前 → 相对顺序变了，需要移动
+                newFiber.flags |= Placement;
+                return lastPlaceIndex;
+            } else {
+                // 顺序没变 → 更新 lastPlaceIndex 为老节点的 index
+                return oldIndex;
+            }
+        } else {
+            // 新增节点 → 需要插入 DOM
+            newFiber.flags |= Placement;
+            return lastPlaceIndex;
         }
     }
 
+    /**
+     * updateSlot —— 第一轮逐个比较时的「单槽位」复用判断
+     *
+     * 在多节点 Diff 第一步使用：逐个比较同一下标位置的新老节点，
+     * 判断能否复用，能则返回复用后的 Fiber，不能则返回 null（退出第一轮）。
+     *
+     * 复用条件（任一条不满足即返回 null）：
+     * - 文本节点：老节点必须也是文本（key 为 null）
+     * - ReactElement：key 必须相同（文本节点的 key 恒为 null）
+     *
+     * @param returnFiber - 父 Fiber
+     * @param oldFiber    - 对应位置的老节点（可能为 null）
+     * @param newChild    - 新的子节点
+     * @returns 复用后的 Fiber，或 null 表示无法复用
+     */
     function updateSlot(
         returnFiber: Fiber,
         oldFiber: Fiber | null,
         newChild: any
-    ){
-        //判断节点是否可以复用
-        const key=oldFiber!==null?oldFiber.key:null;
-        if(isText(newChild)){
-            if(key!==null){
-                //新节点是文本，老节点不是文本
-                return null
+    ) {
+        // 老节点的 key（老节点为 null 时视为 null）
+        const key = oldFiber !== null ? oldFiber.key : null;
+
+        if (isText(newChild)) {
+            // 新节点是文本，但老节点有 key → 类型不匹配，无法复用
+            if (key !== null) {
+                return null;
             }
-            return updateTextNode(returnFiber,oldFiber,newChild)
+            return updateTextNode(returnFiber, oldFiber, newChild);
         }
-        if(typeof newChild==='object'&&newChild!==null){
-            if(newChild.key===key){
-                return updateElement(returnFiber,oldFiber,newChild)
-            }else{
-                return null
+
+        if (typeof newChild === 'object' && newChild !== null) {
+            // 元素节点：key 相同才复用，否则返回 null 退出第一轮
+            if (newChild.key === key) {
+                return updateElement(returnFiber, oldFiber, newChild);
+            } else {
+                return null;
             }
         }
+
+        return null;
     }
+
+    /**
+     * updateTextNode —— 复用或新建文本 Fiber
+     *
+     * - 老节点是文本（HostText）→ 复用其 DOM 节点（useFiber）
+     * - 老节点不是文本或不存在 → 新建文本 Fiber
+     *
+     * @param returnFiber - 父 Fiber
+     * @param oldFiber    - 候选老节点
+     * @param textContent - 新的文本内容
+     * @returns 复用或新建的文本 Fiber
+     */
     function updateTextNode(
         returnFiber: Fiber,
         oldFiber: Fiber | null,
         textContent: string
-    ){
-        if(oldFiber===null||oldFiber.tag!==HostText){
-            //老节点不是文本
-            const createdFiber=createFiberFromText(textContent);
+    ) {
+        if (oldFiber === null || oldFiber.tag !== HostText) {
+            // 老节点不是文本节点 → 无法复用，新建
+            const createdFiber = createFiberFromText(textContent);
             createdFiber.return = returnFiber;
             return createdFiber;
-        }else{
-            //老节点是文本
-            const existing=useFiber(oldFiber,textContent);
+        } else {
+            // 老节点是文本节点 → 复用其 stateNode（真实 DOM 文本节点）
+            const existing = useFiber(oldFiber, textContent);
             existing.return = returnFiber;
             return existing;
         }
     }
+
+    /**
+     * updateElement —— 复用或新建元素 Fiber
+     *
+     * - 老节点的 elementType（标签/组件类型）相同 → 复用（useFiber）
+     * - 类型不同或老节点不存在 → 新建 Fiber
+     *
+     * @param returnFiber - 父 Fiber
+     * @param oldFiber    - 候选老节点
+     * @param element     - 新的 ReactElement
+     * @returns 复用或新建的元素 Fiber
+     */
     function updateElement(
         returnFiber: Fiber,
         oldFiber: Fiber | null,
         element: ReactElement
-    ){
-        const elementType=element.type
-        if(oldFiber!==null){
-            if(oldFiber.elementType===elementType){
-                //类型 key都相同
-                const existing=useFiber(oldFiber,element.props);
+    ) {
+        const elementType = element.type;
+        if (oldFiber !== null) {
+            if (oldFiber.elementType === elementType) {
+                // 类型相同 → 复用老节点的 DOM（useFiber）
+                const existing = useFiber(oldFiber, element.props);
                 existing.return = returnFiber;
                 return existing;
             }
         }
-        const createdFiber=createFiberFromElement(element);
+        // 类型不同或没有老节点 → 新建
+        const createdFiber = createFiberFromElement(element);
         createdFiber.return = returnFiber;
         return createdFiber;
     }

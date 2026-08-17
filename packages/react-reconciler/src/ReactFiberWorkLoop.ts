@@ -56,18 +56,31 @@ let workProgressRoot: FiberRoot | null = null;
  * 当用户调用 setState、useState、ReactDOM.render 等方法时，
  * 最终都会调用此函数来触发一次渲染流程。
  *
- * 工作流程：
+ * 工作流程（两种调度方式）：
  * 1. 记录当前的 FiberRoot 和 workInProgress
- * 2. 通过 ensureRootIsScheduled 通知 Scheduler（调度器）
- * 3. Scheduler 根据优先级在合适的时机回调 performConcurrentWorkOnroot
+ * 2. 根据 isSync 选择调度策略（见下）
  *
- * @param root  - 需要更新的 FiberRoot（整个应用的根节点容器）
- * @param fiber - 触发更新的 Fiber 节点（setState 所在的组件）
+ * 调度策略：
+ * - isSync 为 true（Hooks 触发，如 useState/useReducer 的 dispatch）：
+ *   用 queueMicrotask 把渲染放到下一个微任务，dispatch 后「尽快」完成渲染，
+ *   不经过 Scheduler，也不受优先级/时间片影响。
+ * - isSync 为 false/undefined（首次 render 等）：
+ *   走 ensureRootIsScheduled → 交给 Scheduler 根据优先级调度。
+ *
+ * @param root   - 需要更新的 FiberRoot（整个应用的根节点容器）
+ * @param fiber  - 触发更新的 Fiber 节点（setState 所在的组件）
+ * @param isSync - 是否同步（微任务）渲染：true 走 queueMicrotask，false 走 Scheduler
  */
-export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber) {
+export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber,isSync?:boolean) {
     workProgressRoot = root;
     workInProgress = fiber;
-    ensureRootIsScheduled(root)
+    if(isSync) {
+        // 同步路径：用一个微任务立即执行渲染（dispatch 调用后尽快完成）
+        queueMicrotask(()=>performConcurrentWorkOnroot(root));
+    }else{
+        // 异步路径：交给 Scheduler，由其根据优先级在合适时机调度
+        ensureRootIsScheduled(root)
+    }
 }
 
 /**

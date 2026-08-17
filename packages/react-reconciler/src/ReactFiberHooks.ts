@@ -31,6 +31,7 @@
 import type {Fiber, FiberRoot} from "./ReactInternalTypes";
 import {scheduleUpdateOnFiber} from "./ReactFiberWorkLoop";
 import {HostRoot} from "./ReactWorkTags";
+import {isFn} from 'shared/utils'
 
 /**
  * Hook 数据结构
@@ -199,7 +200,9 @@ function updateWorkInProgressHook(): Hook {
  * 4. 创建 dispatch 函数（通过 bind 绑定 fiber、hook、reducer）
  * 5. 返回 [state, dispatch]
  *
- * @param reducer    - 状态更新函数：(当前状态, action) → 新状态
+ * @param reducer    - 状态更新函数：(当前状态, action) → 新状态。
+ *                     允许返回 null，用于兼容 useState（reducer 传 null 时
+ *                     直接以 action 作为新状态，见 dispatchReduceAction）
  * @param initialArg - 初始状态值（或 init 函数的参数）
  * @param init       - 可选的惰性初始化函数：(initialArg) → initialState
  * @returns [当前状态, dispatch 函数]
@@ -210,7 +213,7 @@ function updateWorkInProgressHook(): Hook {
  *   // setCount(count + 1) → 触发更新
  */
 export function useReducer<S, I, A>(
-    reducer: (state: S, action: A) => S,
+    reducer: (state: S, action: A) => S|null,
     initialArg: I,
     init?: (initailArg: I) => S
 ): any {
@@ -276,7 +279,10 @@ function dispatchReduceAction<S, A>(
     const root = getRootForUpdateFiber(fiber);
 
     // 通知调度器：这个根节点需要一次新的渲染
-    scheduleUpdateOnFiber(root, fiber);
+    // 第三个参数 isSync=true：Hooks 触发的更新走「同步微任务」路径
+    // （queueMicrotask），保证 dispatch 后立即（下一个微任务）完成渲染，
+    // 而不是走 Scheduler 的异步调度
+    scheduleUpdateOnFiber(root, fiber,true);
 }
 
 /**
@@ -307,4 +313,30 @@ function getRootForUpdateFiber(sourcefiber: Fiber): FiberRoot {
     // node 此时是 HostRoot Fiber（tag === HostRoot）
     // node.stateNode 就是 FiberRootNode
     return node.tag === HostRoot ? node.stateNode : null;
+}
+/**
+ * useState —— 基于 useReducer 实现的状态 Hook
+ *
+ * 这是源码中 useState 与 useReducer 对比的关键点：
+ * useState 本质上是 useReducer 的「语法糖」——它把 reducer 参数传 null，
+ * 使得 dispatchReduceAction 时直接以 action 作为新状态（见该函数：
+ * `hook.memoizedState = reducer ? reducer(...) : action`）。
+ *
+ * 二者在真实源码中的差异：
+ * - useState：如果新 state 与旧 state 相同（Object.is），会跳过本次更新，不触发渲染
+ * - useReducer：不会做这种优化，每次 dispatch 都会触发更新
+ *   （本简化实现里 useState 尚未实现 bailout 优化，直接复用 useReducer）
+ *
+ * 惰性初始化：
+ * - 若 initialState 是函数，则调用它得到初始状态（惰性求值，避免不必要的计算）
+ * - 否则直接使用传入的值
+ *
+ * @param initialState - 初始状态值，或返回初始状态值的函数
+ * @returns [当前状态, setState 函数]
+ */
+export function useState<S>(initialState:(()=>S)|S){
+    // 惰性初始化：函数则调用，否则直接取值
+    const init=isFn(initialState)? (initialState as any)():initialState;
+    // 复用 useReducer，reducer 传 null → dispatch 时直接以新值替换旧值
+    return useReducer(null,init)
 }

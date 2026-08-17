@@ -103,6 +103,15 @@ function commitReconciliationEffects(finishedWork:Fiber){
     }
 }
 
+/**
+ * 执行删除操作：把待删除节点的真实 DOM 从父 DOM 中移除
+ *
+ * 遍历 deletions 数组（在协调阶段由 deleteChild 收集），
+ * 逐个找到它们对应的真实 DOM 节点并调用 removeChild 删除。
+ *
+ * @param deletions - 待删除的 Fiber 节点数组
+ * @param parentDom - 父 DOM 节点（删除操作的目标父容器）
+ */
 function commitDeletions(
     deletions:Array<Fiber>,
     parentDom:Element|Document|DocumentFragment
@@ -112,6 +121,19 @@ function commitDeletions(
     })
 }
 
+/**
+ * 向下查找 Fiber 子树中第一个有真实 DOM 节点的后代
+ *
+ * 从给定 Fiber 出发，沿 child 指针一直向下，直到找到
+ * 一个 isHost（HostComponent/HostRoot 等原生节点）且 stateNode 非空的节点。
+ *
+ * 为什么需要它？
+ * 删除/插入时，FunctionComponent 等节点本身没有 DOM，
+ * 需要向下找到其子树中第一个真实的 DOM 节点。
+ *
+ * @param fiber - 需要查找 DOM 节点的 Fiber
+ * @returns 第一个真实 DOM 节点
+ */
 function getStateNode(fiber:Fiber){
     let node =fiber;
     while(1){
@@ -132,7 +154,8 @@ function getStateNode(fiber:Fiber){
  * 2. 通过 getHostParenFiber 向上查找最近的有 DOM 节点的祖先 Fiber
  * 3. 获取父 DOM 节点（注意处理 HostRoot 的情况：其 stateNode 是 FiberRoot，
  *    真实的容器 DOM 在 stateNode.container 中）
- * 4. 执行 parentDom.appendChild(domNode) 完成 DOM 插入
+ * 4. 找到要插入位置之后的「宿主兄弟节点」before（见 getHostSibling）
+ * 5. 若 before 存在则 insertBefore，否则 append 到父 DOM 末尾
  *
  * @param finishedWork - 需要插入 DOM 的 Fiber 节点
  */
@@ -151,14 +174,97 @@ function commitPlacement(finishedWork:Fiber){
             //HostRoot
             parentDom=parentDom.containerInfo;
         }
-        // 将当前 DOM 节点挂载到父 DOM 下，完成 DOM 树的构建
-        parentDom.appendChild(domNode);
+        // 找到插入点：遍历兄弟节点，找到 finishedWork 之后第一个
+        // 「有 DOM 且本轮不发生移动」的宿主节点，作为 insertBefore 的锚点
+        const before=getHostSibling(finishedWork)
+        insertOrAppendPlacementNode(finishedWork,before,parentDom)
+        // 旧实现：直接 appendChild —— 只能追加到末尾，无法处理「移动到中间」的场景
+        // parentDom.appendChild(domNode);
     }else{
+        // 当前 Fiber 没有自己的 DOM（如 FunctionComponent），
+        // 递归处理其子节点，直到找到有 DOM 的节点执行插入
         let kid=finishedWork.child;
         while (kid!==null){
             commitPlacement(kid)
             kid=kid.sibling;
         }
+    }
+}
+
+/**
+ * 查找当前 Fiber 之后第一个「稳定」的宿主兄弟节点（DOM 节点）
+ *
+ * 这是实现节点「移动到正确位置」的关键。当节点被标记 Placement 需要插入时，
+ * 不能简单地 appendChild 到末尾，而要找到它后面第一个「本轮不会移动」的
+ * 已有 DOM 节点作为锚点，用 insertBefore 插到该锚点之前。
+ *
+ * 查找逻辑（带标签的 while 循环 + 递归下降）：
+ * 1. 从 fiber 出发向右找兄弟节点（sibling）；若当前层没有兄弟，
+ *    则沿 return 向上，直到遇到有兄弟的祖先或宿主父节点。
+ * 2. 对找到的兄弟节点：如果它不是宿主节点，就向下找它的 child，
+ *    直到找到一个宿主节点（跳过那些本身也标记了 Placement 的节点——
+ *    它们也会移动，不能作为锚点）。
+ * 3. 找到的宿主节点若未标记 Placement（本轮不移动），返回它的 stateNode。
+ *
+ * @param fiber - 需要确定插入位置的 Fiber
+ * @returns 锚点 DOM 节点（插到它之前）；找不到则返回 null（追加到末尾）
+ */
+function getHostSibling(fiber:Fiber){
+    let node=fiber;
+    // 标签循环：continue sibling 会跳到这一层，重新开始寻找兄弟
+    sibling:while(1){
+        // 当前节点没有兄弟 → 沿 return 向上找祖先的兄弟
+        while(node.sibling===null){
+            // 回溯到根节点 / 宿主父节点 → 没有可用的锚点
+            if(node.return===null||isHostParent(node.return)){
+                return null
+            }
+            node=node.return;
+        }
+        // 向右移动到兄弟节点
+        node=node.sibling;
+        // 向下寻找兄弟子树中的第一个宿主节点
+        while(!isHost(node)){
+            // 兄弟节点本身也要移动 → 不能作为锚点，跳过继续找下一个兄弟
+            if(node.flags&Placement){
+                continue sibling
+            }
+            if(node.child===null){
+                // 该节点没有子节点，向下找不到宿主节点 → 跳过
+                continue sibling;
+            }else{
+                // 有子节点 → 继续向下深入
+                node=node.child
+            }
+        }
+        // 找到宿主节点且它本轮不移动 → 作为锚点返回
+        if(!(node.flags&Placement)){
+            return node.stateNode
+        }
+    }
+}
+
+/**
+ * 将节点的真实 DOM 插入到父 DOM 的指定位置
+ *
+ * - before 存在 → 用 insertBefore 插到锚点之前（保持正确顺序）
+ * - before 为 null → 用 append 追加到父 DOM 末尾
+ *
+ * @param node   - 需要插入的 Fiber
+ * @param before - 锚点 DOM 节点（可为 null）
+ * @param parent - 父 DOM 节点
+ */
+function insertOrAppendPlacementNode(
+    node:Fiber,
+    before:Element,
+    parent:Element
+){
+    if(before){
+        // 插到锚点之前：保证「移动到中间」的场景顺序正确
+        parent.insertBefore(getStateNode(node),before)
+    }else{
+        // 没有锚点 → 追加到末尾
+        parent.append(getStateNode(node));
     }
 }
 
