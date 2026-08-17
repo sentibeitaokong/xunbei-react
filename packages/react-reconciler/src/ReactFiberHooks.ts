@@ -338,5 +338,9 @@ export function useState<S>(initialState:(()=>S)|S){
     // 惰性初始化：函数则调用，否则直接取值
     const init=isFn(initialState)? (initialState as any)():initialState;
     // 复用 useReducer，reducer 传 null → dispatch 时直接以新值替换旧值
-    return useReducer(null,init)
+    return useReducer(
+        (state: S, action: S | ((prev: S) => S)) =>
+            isFn(action) ? (action as any)(state) : action,
+        init
+    );
 }

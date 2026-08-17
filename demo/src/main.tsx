@@ -69,7 +69,7 @@ function FunctionComponent(props: {name: string}) {
         <div className="border">
             {/* <p>{props.name}</p> */}
              <button onClick={() => setCount()}>{count}</button>
-             <button onClick={() => setCount2(count2+1)}>{count2}</button>
+             <button onClick={() => setCount2(count1=>count1+1)}>{count2}</button>
             {/* 以下三行用于验证协调阶段对「空值」子节点的处理：
                 null / undefined / boolean 都不渲染任何 DOM，
                 对应 reconcileChildFibers 中 return null 的分支 */}

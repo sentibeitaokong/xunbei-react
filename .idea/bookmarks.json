@@ -123,6 +123,18 @@
   ],
   "组件更新": [
     {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberHooks.js",
+      "linenumber": 4768,
+      "name": "1. useReduer入口",
+      "bookmarkType": "DEFAULT"
+    },
+    {
+      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberHooks.js",
+      "linenumber": 3606,
+      "name": "2. Hook调度",
+      "bookmarkType": "DEFAULT"
+    },
+    {
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberCommitWork.js",
       "linenumber": 2253,
       "name": "5. commit阶段原生标签更新入口",
@@ -150,18 +162,6 @@
       "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberBeginWork.js",
       "linenumber": 1513,
       "name": "3. 注册hook",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberHooks.js",
-      "linenumber": 3605,
-      "name": "2. Hook调度",
-      "bookmarkType": "DEFAULT"
-    },
-    {
-      "fileDescriptor": "/Users/qianxunzhixiaxiangni/WebstormProjects/DebugReact/src/react/packages/react-reconciler/src/ReactFiberHooks.js",
-      "linenumber": 4767,
-      "name": "1. useReduer入口",
       "bookmarkType": "DEFAULT"
     }
   ],
