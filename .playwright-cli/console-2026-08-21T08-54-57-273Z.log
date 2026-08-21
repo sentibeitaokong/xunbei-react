@@ -1,0 +1,55 @@
+[      63ms] [LOG] [HMR] Waiting for update signal from WDS... @ http://localhost:3000/static/js/0.chunk.js:8897
+[      86ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/static/js/main.chunk.js:20919
+[      87ms] [LOG] root FiberRootNode @ http://localhost:3000/static/js/main.chunk.js:21274
+[      88ms] [LOG] %c React Version  19.3.0 font-size:24px; background:green; color:yellow; @ http://localhost:3000/static/js/main.chunk.js:289
+[      90ms] [LOG] FiberNode @ http://localhost:3000/static/js/main.chunk.js:51547
+[      91ms] [LOG] null @ http://localhost:3000/static/js/main.chunk.js:25901
+[      91ms] [LOG] Symbol(react.transitional.element) Symbol(react.transitional.element) @ http://localhost:3000/static/js/main.chunk.js:23261
+[      92ms] [LOG] compute @ http://localhost:3000/static/js/main.chunk.js:1138
+[      92ms] [LOG] Symbol(react.transitional.element) Symbol(react.transitional.element) @ http://localhost:3000/static/js/main.chunk.js:23261
+[      92ms] [LOG] undefined Symbol(react.transitional.element) @ http://localhost:3000/static/js/main.chunk.js:23261
+[      94ms] [LOG] undefined Symbol(react.transitional.element) @ http://localhost:3000/static/js/main.chunk.js:23261
+[     240ms] [WARNING] src/index.js
+  Line 10:8:  'ClassFunctionComponent' is defined but never used  no-unused-vars
+  Line 14:8:  'UseActionStatePage' is defined but never used      no-unused-vars
+  Line 15:8:  'UseFormStatusPage' is defined but never used       no-unused-vars
+  Line 18:8:  'UseOptimisticPage' is defined but never used       no-unused-vars
+  Line 19:8:  'UseOptimisticPage2' is defined but never used      no-unused-vars
+  Line 22:8:  'UsePage' is defined but never used                 no-unused-vars
+  Line 25:8:  'RefPage19' is defined but never used               no-unused-vars
+  Line 27:8:  'UseDeferredValuePage' is defined but never used    no-unused-vars
+
+src/pages/ClassFunctionComponent.jsx
+  Line 2:13:  'ReactDOM' is defined but never used  no-unused-vars
+
+src/pages/UseDeferredValuePage.js
+  Line 1:38:  'memo' is defined but never used  no-unused-vars @ http://localhost:3000/static/js/0.chunk.js:4358
+[   31848ms] [WARNING] src/index.js
+  Line 8:8:   'UseMemoPage' is defined but never used             no-unused-vars
+  Line 10:8:  'ClassFunctionComponent' is defined but never used  no-unused-vars
+  Line 14:8:  'UseActionStatePage' is defined but never used      no-unused-vars
+  Line 15:8:  'UseFormStatusPage' is defined but never used       no-unused-vars
+  Line 18:8:  'UseOptimisticPage' is defined but never used       no-unused-vars
+  Line 19:8:  'UseOptimisticPage2' is defined but never used      no-unused-vars
+  Line 22:8:  'UsePage' is defined but never used                 no-unused-vars
+  Line 25:8:  'RefPage19' is defined but never used               no-unused-vars
+  Line 27:8:  'UseDeferredValuePage' is defined but never used    no-unused-vars
+
+src/pages/ClassFunctionComponent.jsx
+  Line 2:13:  'ReactDOM' is defined but never used  no-unused-vars
+
+src/pages/UseDeferredValuePage.js
+  Line 1:38:  'memo' is defined but never used  no-unused-vars @ http://localhost:3000/static/js/0.chunk.js:4358
+[   32039ms] ReferenceError: process is not defined
+    at 4043 (<anonymous>:2:13175)
+    at r (<anonymous>:2:306606)
+    at 8048 (<anonymous>:2:9504)
+    at r (<anonymous>:2:306606)
+    at 8641 (<anonymous>:2:1379)
+    at r (<anonymous>:2:306606)
+    at <anonymous>:2:315634
+    at <anonymous>:2:324254
+    at <anonymous>:2:324258
+    at e.onload (http://localhost:3000/static/js/0.chunk.js:6374:324874)
+[ 5983840ms] [INFO] The development server has disconnected.
+Refresh the page if necessary. @ http://localhost:3000/static/js/0.chunk.js:4306

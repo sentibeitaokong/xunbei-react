@@ -198,4 +198,3 @@ export function createFiberFromText(content:string):Fiber{
     const fiber=createFiber(HostText,content,null)
     return fiber
 }
-

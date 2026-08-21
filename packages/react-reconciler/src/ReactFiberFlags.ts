@@ -9,30 +9,42 @@
  * - flags & Placement  → 检测是否需要插入操作
  *
  * 当前已启用的标记：
- * - Placement      (0b...010):  需要插入 DOM
- * - Update         (0b...100):  需要更新 DOM 属性
- * - ChildDeletion  (0b...1000): 需要删除子节点
- * - ContentReset   (0b...10000):需要重置文本内容
+ * - Placement      (0b...010):    需要插入 DOM
+ * - Update         (0b...100):    需要更新 DOM 属性；函数组件上还用于触发 Layout Effect
+ * - Cloned         (0b...1000):   节点被克隆（备用，见下方说明）
+ * - ChildDeletion  (0b...10000):  需要删除子节点
+ * - ContentReset   (0b...100000): 需要重置文本内容
+ * - Passive        (0b...0100_0000_0000): 需要触发 Passive Effect（useEffect）
  * - Incomplete     : 渲染未完成，需要重新处理
  * - Forked         : 节点被克隆（用于 Suspense 等场景）
+ *
+ * 注意：Cloned 与 Forked 语义相近（都表示「被克隆」），
+ * 真实 React 中二者用于不同场景（Cloned 用于标志已克隆过、避免重复克隆）。
  */
 
 export type Flags = number;
-
 /** 无副作用标记——初始状态，表示不需要执行任何 DOM 操作 */
-export const NoFlags = /*                      */ 0b000000000000000000000000;
+export const NoFlags = /*                      */ 0b0000000000000000000000000000000;
 
 /** 插入标记——需要将对应 DOM 节点插入到父节点中 */
-export const Placement = /*                    */ 0b000000000000000000000010;
+export const Placement = /*                    */ 0b0000000000000000000000000000010;
 /** 更新标记——需要更新 DOM 节点的属性（如 className、style、事件等） */
-export const Update = /*                       */ 0b000000000000000000000100;
+export const Update = /*                       */ 0b0000000000000000000000000000100;
+
 /** 删除子节点标记——需要删除该 Fiber 的子 DOM 节点 */
-export const ChildDeletion = /*                */ 0b00000000000000000000001000;
+export const ChildDeletion = /*                */ 0b0000000000000000000000000010000;
 /** 重置文本内容标记——需要重置文本节点的内容 */
-export const ContentReset = /*                 */ 0b00000000000000000000010000;
+export const ContentReset = /*                 */ 0b0000000000000000000000000100000;
+/** 克隆标记——该 Fiber 已被克隆（真实 React 用于避免重复克隆；本实现暂未使用） */
+export const Cloned = /*                       */ 0b0000000000000000000000000001000;
+
+/** 被动副作用标记——该函数组件需要触发 Passive Effect（useEffect）
+ *  被 useEffect 在 updateEffectImpl 中通过 flags |= Passive 置上，
+ *  Commit 阶段的 flushPassiveEffects 检测此位并执行对应的 effect。 */
+export const Passive = /*                      */ 0b0000000000000000000100000000000;
 
 // 以下标记不是传统意义上的副作用，但复用 Flags 字段存储：
 /** 未完成标记——该 Fiber 的渲染未完成，需要重新处理（用于错误边界等场景） */
-export const Incomplete = /*                   */ 0b00000000000100000000000000;
+export const Incomplete = /*                   */ 0b0000000000000001000000000000000;
 /** 克隆标记——该 Fiber 被克隆了一份（用于 Suspense 的 offscreen 切换等场景） */
-export const Forked = /*                       */ 0b00000010000000000000000000;
+export const Forked = /*                       */ 0b0000000000100000000000000000000;

@@ -1,0 +1,113 @@
+[     114ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:72
+[     114ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787301568680:471
+[     114ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787301568680:416
+[     260ms] TypeError: Cannot read properties of null (reading 'lastEffect')
+    at commitHookEffectlistMount (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:94:31)
+    at commitPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:309:5)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:301:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:299:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:299:3)
+    at flushPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:291:2)
+    at http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:239:3
+    at workLoop (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:215:33)
+    at flushWork (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:168:10)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:141:18)
+[    4992ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:72
+[    4992ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787301568680:471
+[    4992ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787301568680:416
+[    4998ms] TypeError: Cannot read properties of null (reading 'lastEffect')
+    at commitHookEffectlistMount (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:94:31)
+    at commitPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:309:5)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:301:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:299:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:299:3)
+    at flushPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:291:2)
+    at http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:239:3
+    at workLoop (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:215:33)
+    at flushWork (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:168:10)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:141:18)
+[   13664ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:72
+[   13673ms] TypeError: Cannot read properties of null (reading 'lastEffect')
+    at commitHookEffectlistMount (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:94:31)
+    at commitPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:309:5)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:301:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:299:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:299:3)
+    at flushPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:291:2)
+    at http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:239:3
+    at workLoop (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:215:33)
+    at flushWork (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:168:10)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:141:18)
+[  248753ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301834721:72
+[  248754ms] [LOG] FiberNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:92
+[  248754ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787301834721:471
+[  248754ms] [LOG] FiberNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:92
+[  248754ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787301834721:416
+[  248754ms] [LOG] FiberNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:92
+[  248759ms] TypeError: Cannot read properties of null (reading 'lastEffect')
+    at commitHookEffectlistMount (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:95:31)
+    at commitPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:310:5)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:302:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:300:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:300:3)
+    at flushPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301834721:292:2)
+    at http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301834721:239:3
+    at workLoop (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:215:33)
+    at flushWork (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:168:10)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:141:18)
+[  737306ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:5173/src/main.tsx?t=1787302323295:0
+[  737306ms] [ERROR] [vite] Failed to reload /src/main.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://127.0.0.1:5173/@vite/client:524
+[  737306ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:5173/@vite/client:992
+[ 2041329ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts:72
+[ 2041329ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx:471
+[ 2041329ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx:416
+[ 2041360ms] TypeError: Cannot read properties of null (reading 'lastEffect')
+    at commitHookEffectlistMount (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:94:31)
+    at commitPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:309:5)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:301:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:299:3)
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:299:3)
+    at flushPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:291:2)
+    at http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts:239:3
+    at workLoop (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:215:33)
+    at flushWork (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:168:10)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:141:18)
+[ 2117276ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787303703277:72
+[ 2117277ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787303703277:72
+[ 2117277ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787303703277:477
+[ 2117277ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787303703277:423
+[ 2117278ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787303703277:72
+[ 2117278ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787303703275:471
+[ 2117278ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787303703275:416
+[ 2236402ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:5173/@vite/client:992
+[ 3466655ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx:472
+[ 3466655ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx:472
+[ 3466655ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx:417
+[ 3466655ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx:417
+[ 3544565ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305130514:472
+[ 3544565ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305130514:472
+[ 3544565ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305130514:417
+[ 3544565ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305130514:417
+[ 3857006ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305442997:472
+[ 3857006ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305442997:417
+[ 3857006ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305442997:478
+[ 3857006ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305442997:424
+[ 4069067ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305655028:474
+[ 4069067ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305655028:417
+[ 4069070ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305655028:480
+[ 4069070ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305655028:425
+[ 4171875ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305757855:472
+[ 4171875ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305757855:417
+[ 4171875ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305757855:478
+[ 4171875ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305757855:424
+[ 4363989ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305949891:472
+[ 4363990ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305949891:417
+[ 4363991ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787305949891:478
+[ 4363991ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787305949891:424
+[ 6450350ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787308036186:483
+[ 6450350ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787308036186:428
+[ 6450350ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787308036186:489
+[ 6450350ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787308036186:435
+[ 6463636ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:5173/src/main.tsx?t=1787308049626:0
+[ 6463636ms] [ERROR] [vite] Failed to reload /src/main.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://127.0.0.1:5173/@vite/client:524
+[ 6463638ms] [LOG] [vite] server connection lost. Polling for restart... @ http://127.0.0.1:5173/@vite/client:992

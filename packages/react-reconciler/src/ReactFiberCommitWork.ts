@@ -6,19 +6,27 @@
  *
  * Commit 阶段分为三个子阶段：
  * 1. BeforeMutation 阶段（此处未实现）：DOM 变更前的准备工作（如 getSnapshotBeforeUpdate）
- * 2. Mutation 阶段（本文件实现）：执行实际的 DOM 操作（插入、更新、删除）
- * 3. Layout 阶段（此处未实现）：DOM 变更后的副作用（如 useEffect、useLayoutEffect）
+ * 2. Mutation 阶段（本文件实现）：执行实际的 DOM 操作（插入、更新、删除），
+ *    并同步执行 useLayoutEffect（layout effect）
+ * 3. Layout 阶段（此处未实现）
  *
  * 本文件实现了 Mutation 阶段的核心逻辑：
  * - 深度优先遍历 Fiber 树（递归 + 单链表）
  * - 根据 Fiber.flags 判断需要执行的 DOM 操作（Placement 插入、Update 更新、Deletion 删除）
  * - 找到最近的有 DOM 节点的祖先 Fiber，将子 DOM 挂载到正确的位置
+ *
+ * 此外还实现了 Effect Hook 的执行：
+ * - Layout Effect（useLayoutEffect）：在 Mutation 阶段同步执行（commitHookEffectlistMount）
+ * - Passive Effect（useEffect）：在 Mutation 之后由 flushPassiveEffects 异步执行
+ * - 卸载清理：删除节点时递归执行 destroy（commitHookEffectlistUnmount）
  */
 
 import type {FiberRoot,Fiber} from "./ReactInternalTypes";
-import {ChildDeletion, Placement} from "./ReactFiberFlags";
-import {HostComponent, HostRoot} from "./ReactWorkTags";
+import {ChildDeletion, Passive, Placement, Update} from "./ReactFiberFlags";
+import {FunctionComponent, HostComponent, HostRoot} from "./ReactWorkTags";
 import {isHost} from "./ReactFiberCompleteWork";
+import {HookLayout, HookPassive} from "./ReactHookEffectTags";
+import type {HookFlags} from "./ReactHookEffectTags";
 
 /**
  * 提交 Mutation 副作用（Commit 阶段 Mutation 子阶段的入口）
@@ -76,12 +84,11 @@ function recursivelyTraverseMutationEffects(root:FiberRoot,parentFiber:Fiber){
  * 提交协调阶段产生的副作用（根据 flags 执行对应的 DOM 操作）
  *
  * 检查 finishedWork.flags 中的副作用标记，执行对应的 DOM 操作：
- * - Placement（0b001）：节点需要插入到 DOM 树中
- * - Update（待实现）：节点需要更新 DOM 属性
- * - ChildDeletion（待实现）：子节点需要从 DOM 树中删除
+ * - Placement（0b0010）：节点需要插入到 DOM 树中
+ * - ChildDeletion（0b10000）：子节点需要从 DOM 树中删除
+ * - Update（0b0100）：宿主节点需更新属性；函数组件则用于触发 Layout Effect
  *
- * 处理完 Placement 后，通过位取反（~Placement）清除该标记，
- * 避免重复处理。
+ * 每处理完一种标记，就用位取反（~Flag）清除它，避免重复处理。
  *
  * @param finishedWork - 需要处理副作用的 Fiber 节点
  */
@@ -94,12 +101,65 @@ function commitReconciliationEffects(finishedWork:Fiber){
         // 清除 Placement 标记（位取反后位与）：flags = flags & ~Placement
         finishedWork.flags&=~Placement;
     }
+    // 有 ChildDeletion 标记：删除被协调阶段收集到 deletions 数组中的子节点
     if(flags&ChildDeletion){
+        // 找到有真实 DOM 的宿主父节点，作为 removeChild 的目标容器
         const parentFiber=isHostParent(finishedWork)?finishedWork:getHostParenFiber(finishedWork);
         const parentDom=parentFiber.stateNode
         commitDeletions(finishedWork.deletions,parentDom);
         finishedWork.flags&=~ChildDeletion;
         finishedWork.deletions=null
+    }
+    // Update 标记在函数组件上被复用为「需要执行 Layout Effect」的信号
+    // （useLayoutEffect 在 updateEffectImpl 中通过 flags |= Update 置上此位）
+    if(flags&Update){
+        if(finishedWork.tag===FunctionComponent){
+            // 执行 layout effect：先跑上一次的 destroy，再跑本次的 create
+            commitHookEffectlistMount(HookLayout,finishedWork);
+            finishedWork.flags&=~Update;
+        }
+    }
+}
+
+/**
+ * 执行一组 Effect 的「挂载」流程（先 cleanup 再 create）
+ *
+ * 遍历函数组件 updateQueue 中存储的 Effect 循环链表，
+ * 只处理 tag 包含 hookFlags 指定类型的 effect（Layout 或 Passive），
+ * 对每个匹配的 effect：
+ * 1. 若上一次的 destroy（cleanup 函数）存在，先执行它
+ * 2. 调用 create() 生成新的副作用，并将其返回值（cleanup 函数）存入 destroy
+ *
+ * 为什么是循环链表？
+ * - pushEffect 用「单向循环链表」组织 effect（lastEffect.next 指向 firstEffect）
+ * - 这样从 lastEffect.next 出发 do...while 一圈，即可按声明顺序遍历所有 effect
+ *
+ * @param hookFlags    - 要执行的 effect 类型标记（HookLayout / HookPassive）
+ * @param finishedWork - 拥有这些 effect 的函数组件 Fiber
+ */
+export function commitHookEffectlistMount(hookFlags:HookFlags,finishedWork:Fiber){
+    const updateQueue=finishedWork.updateQueue;
+    // 没有 effect 队列（或队列为空）→ 直接返回
+    if (updateQueue === null || updateQueue.lastEffect === null) {
+        return;
+    }
+    let lastEffect=updateQueue!.lastEffect;
+    if(lastEffect!==null){
+        // 循环链表的头节点 = 尾节点的 next（即最早声明的 effect）
+        const firstEffect=lastEffect.next;
+        let effect=firstEffect;
+        do{
+            // 用位与判断该 effect 是否属于目标类型（如 Layout）
+            if((effect.tag&hookFlags)===hookFlags){
+                // 先执行上一次遗留的 cleanup（更新时才会存在）
+                if (typeof effect.destroy === 'function') {
+                    effect.destroy();
+                }
+                // 执行 create()，把返回的 cleanup 函数存回 destroy，供下次清理
+                effect.destroy = effect.create() as (() => void) | void;
+            }
+            effect=effect.next;
+        }while(effect!==firstEffect)
     }
 }
 
@@ -107,7 +167,9 @@ function commitReconciliationEffects(finishedWork:Fiber){
  * 执行删除操作：把待删除节点的真实 DOM 从父 DOM 中移除
  *
  * 遍历 deletions 数组（在协调阶段由 deleteChild 收集），
- * 逐个找到它们对应的真实 DOM 节点并调用 removeChild 删除。
+ * 对每个待删除节点：
+ * 1. 先递归执行其子树中所有 effect 的 cleanup（commitHookEffectlistUnmount）
+ * 2. 再找到它的真实 DOM 节点并调用 removeChild 删除
  *
  * @param deletions - 待删除的 Fiber 节点数组
  * @param parentDom - 父 DOM 节点（删除操作的目标父容器）
@@ -117,8 +179,44 @@ function commitDeletions(
     parentDom:Element|Document|DocumentFragment
 ){
     deletions.forEach(deletion=>{
-        parentDom.removeChild(getStateNode(deletion))
+        // 删除前先执行 effect 清理：卸载组件时应触发 useEffect/useLayoutEffect 的 cleanup
+        commitHookEffectlistUnmount(deletion);
+        parentDom.removeChild(getStateNode(deletion)    )
     })
+}
+
+/**
+ * 递归执行 Fiber 子树中所有 effect 的「卸载清理」（cleanup / destroy）
+ *
+ * 组件卸载（或子树被删除）时，需要按顺序执行其 effect 的 destroy 函数，
+ * 释放资源（如清除定时器、取消订阅等）。
+ *
+ * 处理逻辑（后序遍历）：
+ * 1. 若当前 Fiber 是函数组件且持有 effect 链表，遍历该循环链表，
+ *    执行每个 effect 的 destroy，并置为 undefined 防止重复执行
+ * 2. 递归处理子节点（child → sibling），保证整棵子树都被清理
+ *
+ * @param fiber - 需要清理 effect 的 Fiber 子树根节点
+ */
+function commitHookEffectlistUnmount(fiber: Fiber) {
+    // 函数组件自身：执行其 effect 链表中所有 effect 的 destroy
+    if (fiber.tag === FunctionComponent && fiber.updateQueue?.lastEffect) {
+        let effect = fiber.updateQueue.lastEffect.next;
+        const first = effect;
+        do {
+            if (typeof effect.destroy === 'function') {
+                effect.destroy();
+                effect.destroy = undefined;
+            }
+            effect = effect.next;
+        } while (effect !== first);
+    }
+    // 递归清理子节点（后序遍历：先子后父）
+    let child = fiber.child;
+    while (child) {
+        commitHookEffectlistUnmount(child);
+        child = child.sibling;
+    }
 }
 
 /**
@@ -298,6 +396,62 @@ function getHostParenFiber(fiber:Fiber):Fiber{
     }
     // 理论上不应该走到这里：至少根节点 HostRoot 一定在祖先链中
     throw new Error('Expected to find a host parent')
+}
+
+/**
+ * 执行 Passive Effect（useEffect）的「挂载」流程
+ *
+ * 这是 useEffect 的执行入口，由 commitRoot 通过 scheduleCallback 异步调度，
+ * 在浏览器绘制之后调用。它负责后序遍历整棵 Fiber 树，
+ * 找到所有带有 Passive 标记的函数组件，执行其 effect。
+ *
+ * 为什么不在 Mutation 阶段同步执行？
+ * - useEffect 语义要求「绘制后」执行，避免阻塞 DOM 变更与绘制
+ * - 因此单独提供此函数，交给 Scheduler 调度
+ *
+ * @param finishedWork - 本次提交的 Fiber 树根节点
+ */
+export function flushPassiveEffects(finishedWork:Fiber){
+    // 1. 先递归遍历并执行所有子节点的 passive effect（自底向上）
+    recursivelyTraversePassiveMountEffects(finishedWork);
+    // 2. 最后执行根节点自身的 passive effect
+    commitPassiveEffects(finishedWork);
+}
+
+/**
+ * 递归遍历子树，执行每个节点的 passive effect（后序遍历）
+ *
+ * 遍历顺序：child → 递归 → sibling（与 Mutation 阶段一致），
+ * 确保子组件的 useEffect 先于父组件执行（React 中 effect 先子后父）。
+ */
+function recursivelyTraversePassiveMountEffects(finishedWork:Fiber){
+    let child=finishedWork.child;
+    while(child!==null){
+        // 1. 递归处理该子节点的整棵子树
+        recursivelyTraversePassiveMountEffects(child);
+        // 2. 处理该子节点自身的 passive effect
+        commitPassiveEffects(child);
+        child=child.sibling;
+    }
+}
+
+/**
+ * 对单个 Fiber 执行其 passive effect（若带 Passive 标记）
+ *
+ * 只处理函数组件：当 flags 包含 Passive 位时，
+ * 调用 commitHookEffectlistMount(HookPassive, ...) 执行 effect，
+ * 完成后清除 Passive 标记，避免重复执行。
+ */
+function commitPassiveEffects(finishedWork:Fiber){
+    switch (finishedWork.tag) {
+        case FunctionComponent:{
+            if(finishedWork.flags&Passive){
+                commitHookEffectlistMount(HookPassive,finishedWork)
+                finishedWork.flags&=~Passive;
+            }
+            break
+        }
+    }
 }
 
 /**

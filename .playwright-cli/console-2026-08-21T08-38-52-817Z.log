@@ -1,0 +1,26 @@
+[     112ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts:72
+[     112ms] [LOG] useLayoutEffect Child @ http://127.0.0.1:5173/src/main.tsx:471
+[     112ms] [LOG] useLayoutEffect @ http://127.0.0.1:5173/src/main.tsx:416
+[     112ms] [LOG] FiberNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts:235
+[     257ms] TypeError: Cannot read properties of null (reading 'child')
+    at recursivelyTraversePassiveMountEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:296:27)
+    at flushPassiveEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts:291:2)
+    at http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts:238:3
+    at workLoop (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:215:33)
+    at flushWork (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:168:10)
+    at MessagePort.performWorkUntilDeadline (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/scheduler/src/Scheduler.ts:141:18)
+[   35883ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:72
+[   35884ms] [LOG] root FiberRootNode @ http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:72
+[   35884ms] TypeError: Cannot read properties of null (reading 'lastEffect')
+    at commitHookEffectlistMount (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:94:31)
+    at commitReconciliationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:87:4)
+    at commitMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:24:2)
+    at recursivelyTraverseMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:50:3)
+    at commitMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:22:2)
+    at recursivelyTraverseMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:50:3)
+    at commitMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:22:2)
+    at recursivelyTraverseMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:50:3)
+    at commitMutationEffects (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberCommitWork.ts?t=1787301568680:22:2)
+    at commitRoot (http://127.0.0.1:5173/@fs/Users/qianxunzhixiaxiangni/WebstormProjects/xunbei-react/packages/react-reconciler/src/ReactFiberWorkLoop.ts?t=1787301568680:234:2)
+[   35884ms] [LOG] useEffect Child @ http://127.0.0.1:5173/src/main.tsx?t=1787301568680:477
+[   35884ms] [LOG] useEffect @ http://127.0.0.1:5173/src/main.tsx?t=1787301568680:423

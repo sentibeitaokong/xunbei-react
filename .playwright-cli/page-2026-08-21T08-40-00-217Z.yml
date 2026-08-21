@@ -1,0 +1,4 @@
+- generic [ref=e3]:
+  - button "1" [ref=e7]
+  - button "2" [active] [ref=e8]
+  - generic [ref=e6]: Child

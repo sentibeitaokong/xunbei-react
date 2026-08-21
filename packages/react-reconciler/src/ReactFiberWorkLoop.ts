@@ -24,7 +24,9 @@ import {ensureRootIsScheduled} from "./ReactFiberRootScheduler";
 import {createWorkInProgress} from "./ReactFiber";
 import {beginWork} from "./ReactFiberBeginWork";
 import {completeWork} from "./ReactFiberCompleteWork";
-import {commitMutationEffects} from "./ReactFiberCommitWork";
+import {commitMutationEffects, flushPassiveEffects} from "./ReactFiberCommitWork";
+import {NormalPriority} from 'scheduler/src/SchedulerPriorities'
+import {scheduleCallback} from 'scheduler/src/Scheduler'
 
 type ExecutionContext = number;
 
@@ -99,7 +101,6 @@ export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber,isSync?:bool
 export function performConcurrentWorkOnroot(root: FiberRoot) {
     // 1. Render 阶段：构建 Fiber 树（beginWork + completeWork 的深度优先遍历）
     renderRootSync(root)
-    // console.log('root',root)
     // 2. Commit 阶段：将 VDom 变更应用到真实 DOM
     //    root.current.alternate 指向 Render 阶段刚刚构建完成的 workInProgress 树
     const finishedWork=root.current.alternate
@@ -259,10 +260,17 @@ function completeUnitOfWork(unitOfWork: Fiber) {
  * 应用到真实 DOM 上。Commit 阶段是同步且不可中断的。
  *
  * 执行步骤：
- * 1. 标记进入 CommitContext
- * 2. commitMutationEffects：执行 Mutation 阶段，将 Fiber 树的变更渲染到 DOM
- * 3. 提交完成后启动新一轮的 workInProgress 树构建（为下次更新做准备）
- * 4. 恢复执行上下文
+ * 1. 标记进入 CommitContext（通过位运算 executionContext |= CommitContext）
+ * 2. commitMutationEffects：执行 Mutation 阶段，将 Fiber 树的变更渲染到 DOM。
+ *    其中 useLayoutEffect（layout effect）会在本阶段「同步」执行。
+ * 3. 交换 current 指针（root.current = finishedWork），让新树成为当前树
+ * 4. 通过 scheduleCallback 以普通优先级「异步」调度 flushPassiveEffects，
+ *    在浏览器绘制之后执行 useEffect（passive effect）
+ * 5. 恢复执行上下文
+ *
+ * 为什么 passive effect 要异步执行？
+ * - useEffect 的语义是「绘制之后」执行，不应阻塞本次 DOM 变更和浏览器绘制
+ * - 因此这里不直接调用 flushPassiveEffects，而是交给 Scheduler 安排到回调队列中
  *
  * @param root - 需要提交的 FiberRoot
  */
@@ -270,10 +278,18 @@ function commitRoot(root: FiberRoot) {
     const prevExecutionContext = executionContext;
     executionContext |= CommitContext  // 通过位或运算标记进入 Commit 阶段
     // Mutation 阶段：遍历 effect 链表，将所有 DOM 变更应用到真实 DOM
+    // 同时会同步执行 useLayoutEffect（layout effect）
     commitMutationEffects(root,root.finishedWork) //mutation阶段,渲染dom树
-    // 提交完成后，为下一次更新准备新的 workInProgress 树
-    prepareFreshStack(root);          // 准备 workInProgress 树
-    wookLoopSync()                    // 深度优先遍历构建 Fiber 树
+
+    // passiveEffect（useEffect）是异步执行的。先保存本次提交的 Fiber 树引用，
+    // 避免后续流程将 root.finishedWork 清空后，异步回调里读到 null。
+    const finishedWork = root.finishedWork as Fiber
+    // 将新构建的 workInProgress 树切换为 current 树（双缓冲机制的核心一步）
+    root.current = finishedWork;
+    // 以普通优先级调度一个回调，异步执行 passive effect（绘制后执行，不阻塞渲染）
+    scheduleCallback(NormalPriority,()=>{
+        flushPassiveEffects(finishedWork);
+    })
 
     executionContext = prevExecutionContext  // 恢复上下文
     workProgressRoot = null

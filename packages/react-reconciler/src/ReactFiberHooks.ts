@@ -1,8 +1,10 @@
 /**
  * ReactFiberHooks.ts —— Hooks 实现模块
  *
- * 这是 React Hooks 体系的核心实现，目前支持 useReducer，
- * 未来会扩展 useState、useEffect、useLayoutEffect 等。
+ * 这是 React Hooks 体系的核心实现，支持：
+ * - 状态类：useReducer、useState
+ * - 副作用类：useEffect（被动）、useLayoutEffect（布局）
+ * - 缓存/引用类：useMemo、useCallback、useRef
  *
  * 核心概念：
  *
@@ -32,6 +34,10 @@ import type {Fiber, FiberRoot} from "./ReactInternalTypes";
 import {scheduleUpdateOnFiber} from "./ReactFiberWorkLoop";
 import {HostRoot} from "./ReactWorkTags";
 import {isFn} from 'shared/utils'
+import type {Flags} from "./ReactFiberFlags";
+import {Update,Passive} from './ReactFiberFlags'
+import type {HookFlags} from "./ReactHookEffectTags";
+import {HookLayout,HookPassive} from "./ReactHookEffectTags";
 
 /**
  * Hook 数据结构
@@ -48,6 +54,29 @@ type Hook = {
     memoizedState: any;   // 当前 Hook 存储的状态值
     next: null | Hook;    // 链表中下一个 Hook 的引用
 };
+
+/**
+ * Effect 数据结构 —— 描述一个 useEffect / useLayoutEffect 的副作用对象
+ *
+ * 每个 Effect 存储了：
+ * - tag：HookFlags 位掩码，标记该 effect 的类型（Layout/Passive）与是否需触发（HasEffect）
+ * - create：用户传入的副作用函数（执行后可能返回 cleanup 函数）
+ * - destroy：cleanup 函数（上一次 create 的返回值，供更新/卸载时清理）
+ * - deps：依赖数组，用于判断 effect 是否需要重新执行
+ * - next：指向循环链表中的下一个 Effect
+ *
+ * 与 Hook 的区别：
+ * - Hook 链表挂在 Fiber.memoizedState 上，一个 Hook 对应一次 Hook 调用
+ * - Effect 链表挂在 Fiber.updateQueue 上，一个 Effect 对应一次 effect 调用
+ *   （多个 effect 共享同一循环链表，通过 tag 区分 Layout/Passive）
+ */
+type Effect={
+    tag:HookFlags;
+    create:()=>(()=>void)|void,
+    destroy:(()=>void)|void,
+    deps:Array<any>|null;
+    next:null|Effect
+}
 
 /** 当前正在执行（调用 renderWithHooks）的函数组件 Fiber */
 let currentlyRenderingFiber: Fiber | null = null;
@@ -91,7 +120,8 @@ export function renderWithHooks(
     // 清空旧的 Hook 链表，准备构建新的
     // 在 Update 阶段，updateWorkInProgressHook 会从 current.alternate 恢复旧链表
     workInProgress.memoizedState = null;
-
+    // 清空旧的 Effect 循环链表，本次渲染的 useEffect/useLayoutEffect 会重新构建
+    workInProgress.updateQueue= null;
     // 执行函数组件，内部可能调用 useReducer 等 Hook
     // Hook 函数在 mount 时创建新节点，在 update 时复用 current 树上的节点
     let children = Component(props);
@@ -396,13 +426,162 @@ export function useRef<T>(
     }
     return hook.memoizedState;
 }
+/**
+ * useEffect —— 被动副作用 Hook
+ *
+ * 在浏览器绘制之后「异步」执行，不阻塞 DOM 变更与绘制。
+ * 底层调用 updateEffectImpl，用 Passive / HookPassive 两组标记：
+ * - fiberFlags = Passive：给 Fiber 打上 Passive 标记，commit 阶段据此异步调度
+ * - hookFlags = HookPassive：标记该 effect 属于被动类型，执行时据此过滤
+ *
+ * @param create - 副作用函数，可返回 cleanup 函数
+ * @param deps   - 依赖数组；为 undefined 时每次渲染都执行，否则仅在依赖变化时执行
+ */
+export function useEffect(
+    create:()=>(()=>void)|void,
+    deps:Array<any>|null
+){
+    return updateEffectImpl(Passive,HookPassive,create,deps)
+}
 
-//检查hook依赖项是否变化
+/**
+ * useLayoutEffect —— 布局副作用 Hook
+ *
+ * 在 DOM 变更后、浏览器绘制之前「同步」执行，可读取/修改布局信息。
+ * 与 useEffect 的差异仅在于标记：
+ * - fiberFlags = Update：复用 Update 标记，commitMutationEffects 同步执行
+ * - hookFlags = HookLayout：标记该 effect 属于布局类型
+ *
+ * @param create - 副作用函数，可返回 cleanup 函数
+ * @param deps   - 依赖数组；为 undefined 时每次渲染都执行，否则仅在依赖变化时执行
+ */
+export function useLayoutEffect(
+    create:()=>(()=>void)|void,
+    deps:Array<any>|null
+){
+    return updateEffectImpl(Update,HookLayout,create,deps)
+}
+
+/**
+ * updateEffectImpl —— useEffect / useLayoutEffect 的公共实现
+ *
+ * 负责「获取/创建 effect」并「决定是否需要重新执行」，核心逻辑：
+ *
+ * 1. 获取当前 Hook（mount 新建 / update 复用）
+ * 2. 依赖比较：若 deps 与上一次相同（areHookInputsEqual），
+ *    直接复用上一次的 effect，不重新执行、也不打标记（bailout）
+ * 3. 依赖变化（或首次渲染）：
+ *    - 给 Fiber 打上 fiberFlags 标记（Passive 或 Update），通知 commit 阶段执行
+ *    - 调用 pushEffect 构造新的 Effect 节点，存入 hook.memoizedState
+ *
+ * @param fiberFlags - 需要加到 Fiber.flags 上的标记（决定 effect 何时执行）
+ * @param hookFlags  - 该 effect 的类型标记（Layout / Passive）
+ * @param create     - 副作用函数
+ * @param deps       - 依赖数组
+ */
+function updateEffectImpl(
+    fiberFlags:Flags,
+    hookFlags:HookFlags,
+    create:()=>(()=>void)|void,
+    deps:Array<any>|null
+){
+    const hook = updateWorkInProgressHook();
+    // deps 为 undefined 时视为 null（表示「每次渲染都执行」）
+    const nextDeps = deps === undefined ? null : deps;
+    // 上一次渲染对应的 effect（来自 current 树）
+   const prevEffect = currentHook !== null ? currentHook.memoizedState as Effect : null;
+   // 已有旧 effect 且本次提供了 deps：做依赖浅比较
+   if(prevEffect!==null && prevEffect !== undefined){
+       if(nextDeps != null){
+           const prevDeps=prevEffect.deps;
+           if(areHookInputsEqual(nextDeps,prevDeps)){
+               // 依赖没变 → 复用旧 effect，不重新执行（bailout）
+               hook.memoizedState = prevEffect;
+               return
+           }
+       }
+   }
+   // 依赖变化（或首次渲染）→ 给 Fiber 打标记，通知 commit 阶段执行
+    currentlyRenderingFiber!.flags|=fiberFlags;
+    // 构造新的 effect，并携带上一次的 destroy（cleanup）以便更新时先清理
+    // 1. 保存 effect 到 hook.memoizedState
+    // 2. 同时构建/追加到 Fiber.updateQueue 的 effect 循环链表
+    hook.memoizedState = pushEffect(hookFlags,create,nextDeps,prevEffect?.destroy);
+}
+
+/**
+ * pushEffect —— 构造 Effect 节点并加入循环链表
+ *
+ * 将新建的 Effect 追加到 currentlyRenderingFiber.updateQueue 中维护的
+ * 「单向循环链表」末尾（lastEffect 始终指向最新加入的节点）。
+ *
+ * 链表结构：
+ * - 空链表：创建 { lastEffect } 队列，effect 自环（next 指向自己）
+ * - 非空：把新 effect 插到 lastEffect 之后，再让 lastEffect 指向它
+ *   lastEffect.next 始终指向最早声明的 effect（即链表的头）
+ *
+ * 为什么用循环链表？
+ * - 便于从任意节点出发遍历一圈（见 commitHookEffectlistMount 的 do...while）
+ * - lastEffect 直接定位到「最新的」effect，插入是 O(1)
+ */
+function pushEffect(
+    hookFlags:HookFlags,
+    create:()=>(()=>void)|void,
+    deps:Array<any>|null,
+    destroy:(()=>void)|void
+){
+    const effect:Effect={
+        tag:hookFlags,
+        create,
+        destroy,
+        deps,
+        next:null
+    }
+    let componentUpdateQueue=currentlyRenderingFiber!.updateQueue;
+    // 单向循环链表
+    if(componentUpdateQueue===null){
+        // 首个 effect：创建队列并让 effect 自环
+        componentUpdateQueue={
+            lastEffect:null
+        }
+        currentlyRenderingFiber!.updateQueue=componentUpdateQueue
+        componentUpdateQueue.lastEffect=effect.next=effect
+    }else{
+        // 追加到链表：插入到 lastEffect 之后，再更新 lastEffect 为新节点
+        const lastEffect=componentUpdateQueue.lastEffect
+        const firstEffect=lastEffect.next
+        lastEffect.next=effect
+        effect.next=firstEffect
+        componentUpdateQueue.lastEffect=effect
+    }
+    return effect
+}
+
+/**
+ * areHookInputsEqual —— 检查 Hook 依赖数组是否变化
+ *
+ * 用于 useEffect / useLayoutEffect / useMemo / useCallback 的依赖比较，
+ * 判断本次渲染是否需要重新执行（或重新计算）。
+ *
+ * 比较规则（浅比较）：
+ * - prevDeps 为 null（首次渲染）→ 视为「已变化」
+ * - 依赖数组长度不一致 → 视为「已变化」
+ * - 逐项用 Object.is 比较，任意一项不同 → 视为「已变化」
+ *
+ * 为什么用 Object.is 而不是 ===？
+ * Object.is 能正确区分 NaN 与 NaN（相等）、+0 与 -0（不等），
+ * 更符合 React 官方对依赖比较的语义。
+ *
+ * @param nextDeps - 本次渲染的依赖数组
+ * @param prevDeps - 上一次渲染的依赖数组（可能为 null）
+ * @returns 依赖完全相等返回 true，否则 false
+ */
 export function areHookInputsEqual(
     nextDeps:Array<any>,
     prevDeps:Array<any>|null,
 ):boolean{
-    if(prevDeps === null){
+    // 首次渲染（prevDeps 为 null）或长度不一致 → 直接判定为变化
+    if(prevDeps === null || nextDeps.length !== prevDeps.length){
         return false
     }
     for(let i=0; i<nextDeps.length&&i<prevDeps.length; i++){
