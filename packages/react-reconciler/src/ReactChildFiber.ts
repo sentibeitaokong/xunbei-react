@@ -352,6 +352,7 @@ function createChildReconciler(shouldTrackSideEffects: boolean) {
             }
             if (shouldTrackSideEffects) {
                 // 复用了老节点（alternate 非 null），但 key 相同 type 不同导致新建了 Fiber
+                //newFiber?.alternate === null：表示新 Fiber 没有对应的旧 Fiber，即它不是复用的旧节点，而是全新创建的。
                 // （alternate === null）→ 老节点需要删除
                 if (oldFiber && newFiber?.alternate === null) {
                     deleteChild(returnFiber, oldFiber);

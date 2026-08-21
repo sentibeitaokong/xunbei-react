@@ -1,0 +1,6 @@
+- generic [ref=e3]:
+  - heading "UseMemoPage" [level=3] [ref=e4]
+  - paragraph [ref=e5]: expensive:0
+  - paragraph [ref=e6]: "1"
+  - button "add" [active] [ref=e7]
+  - textbox [ref=e8]

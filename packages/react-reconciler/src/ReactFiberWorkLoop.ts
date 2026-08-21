@@ -99,7 +99,7 @@ export function scheduleUpdateOnFiber(root: FiberRoot, fiber: Fiber,isSync?:bool
 export function performConcurrentWorkOnroot(root: FiberRoot) {
     // 1. Render 阶段：构建 Fiber 树（beginWork + completeWork 的深度优先遍历）
     renderRootSync(root)
-    console.log('root',root)
+    // console.log('root',root)
     // 2. Commit 阶段：将 VDom 变更应用到真实 DOM
     //    root.current.alternate 指向 Render 阶段刚刚构建完成的 workInProgress 树
     const finishedWork=root.current.alternate

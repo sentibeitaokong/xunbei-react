@@ -24,6 +24,7 @@ import {
     Component,
     useReducer,
     useState,
+    useMemo
     // useEffect,
     // useLayoutEffect,
 } from "../which-react";
@@ -220,6 +221,47 @@ const jsx = (
     </div>
 );
 
+export default function UseMemPage(props) {
+    const [count, setCount] = useState(0);
+    const [value, setValue] = useState(1);
+
+    // const expensive = useMemo(() => {
+    //     console.log("compute");
+    //     let sum = 0;
+    //     for (let i = 0; i < count; i++) {
+    //         sum += i;
+    //     }
+    //     return sum;
+    //     //只有count变化，这里才重新执行
+    // }, [count]);
+    console.log("render", { count, value });
+
+    const expensive = () => {
+        console.log("compute", { count });
+
+        let sum = 0;
+      for (let i = 0; i < count; i++) {
+        sum += i;
+      }
+      return sum;
+      //只有count变化，这里才重新执行
+    };
+
+    return (
+        <div>
+            <h3>UseMemoPage</h3>
+            {value}
+            <p>expensive:{expensive()}</p>
+            <p>{count}</p>
+            <button onClick={() => setCount(count + 1)}>add</button>
+            <input value={value} onChange={(e) => {
+                alert("触发了!");
+                setValue(e.target.value)
+            }} />
+        </div>
+    );
+}
+
 /**
  * 启动整个 React 应用
  *
@@ -229,4 +271,4 @@ const jsx = (
  * 3. 调用 scheduleUpdateOnFiber(root, hostFiber) 启动调度
  * 4. Scheduler 回调 performConcurrentWorkOnroot → Render + Commit
  */
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(jsx);
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(<UseMemPage/>);

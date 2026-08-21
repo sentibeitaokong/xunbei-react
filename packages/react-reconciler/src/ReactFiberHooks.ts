@@ -213,7 +213,7 @@ function updateWorkInProgressHook(): Hook {
  *   // setCount(count + 1) → 触发更新
  */
 export function useReducer<S, I, A>(
-    reducer: (state: S, action: A) => S|null,
+    reducer: (state: S, action: A) => S | null,
     initialArg: I,
     init?: (initailArg: I) => S
 ): any {
@@ -282,7 +282,7 @@ function dispatchReduceAction<S, A>(
     // 第三个参数 isSync=true：Hooks 触发的更新走「同步微任务」路径
     // （queueMicrotask），保证 dispatch 后立即（下一个微任务）完成渲染，
     // 而不是走 Scheduler 的异步调度
-    scheduleUpdateOnFiber(root, fiber,true);
+    scheduleUpdateOnFiber(root, fiber, true);
 }
 
 /**
@@ -314,6 +314,7 @@ function getRootForUpdateFiber(sourcefiber: Fiber): FiberRoot {
     // node.stateNode 就是 FiberRootNode
     return node.tag === HostRoot ? node.stateNode : null;
 }
+
 /**
  * useState —— 基于 useReducer 实现的状态 Hook
  *
@@ -334,13 +335,51 @@ function getRootForUpdateFiber(sourcefiber: Fiber): FiberRoot {
  * @param initialState - 初始状态值，或返回初始状态值的函数
  * @returns [当前状态, setState 函数]
  */
-export function useState<S>(initialState:(()=>S)|S){
+export function useState<S>(initialState: (() => S) | S) {
     // 惰性初始化：函数则调用，否则直接取值
-    const init=isFn(initialState)? (initialState as any)():initialState;
+    const init = isFn(initialState) ? (initialState as any)() : initialState;
     // 复用 useReducer，reducer 传 null → dispatch 时直接以新值替换旧值
     return useReducer(
         (state: S, action: S | ((prev: S) => S)) =>
             isFn(action) ? (action as any)(state) : action,
         init
     );
+}
+
+export function useMemo<T>(
+    nextCreate: () => T,
+    deps: Array<any> | null
+): T {
+    const hook = updateWorkInProgressHook()
+    const nextDeps = deps === undefined ? null : deps;
+    const prevState=hook.memoizedState;
+    if(prevState!==null){
+        if(nextDeps != null){
+            const prevDep = prevState[1]
+            if(areHookInputsEqual(nextDeps,prevDep)){
+                //
+                return prevState[0]
+            }
+        }
+    }
+    const nextValue = nextCreate();
+    hook.memoizedState = [nextValue,nextDeps];
+    return nextValue
+}
+
+//检查hook依赖项是否变化
+export function areHookInputsEqual(
+    nextDeps:Array<any>,
+    prevDeps:Array<any>|null,
+):boolean{
+    if(prevDeps === null){
+        return false
+    }
+    for(let i=0; i<nextDeps.length&&i<prevDeps.length; i++){
+        if(Object.is(nextDeps[i],prevDeps[i])){
+            continue
+        }
+        return false;
+    }
+    return true
 }
