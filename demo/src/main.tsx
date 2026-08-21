@@ -17,6 +17,7 @@
 // import React from "react";
 // import ReactDOM from "react-dom";
 // import { useReducer } from "react";
+import {memo} from "react";
 
 import {
     ReactDOM,
@@ -24,7 +25,9 @@ import {
     Component,
     useReducer,
     useState,
-    useMemo
+    useMemo,
+    useCallback,
+    useRef
     // useEffect,
     // useLayoutEffect,
 } from "../which-react";
@@ -221,9 +224,10 @@ const jsx = (
     </div>
 );
 
-export default function UseMemPage(props) {
+export default function UseMemoPage(props) {
     const [count, setCount] = useState(0);
     const [value, setValue] = useState(1);
+    let ref=useRef(0)
 
     // const expensive = useMemo(() => {
     //     console.log("compute");
@@ -246,6 +250,10 @@ export default function UseMemPage(props) {
       return sum;
       //只有count变化，这里才重新执行
     };
+    function handleClick(){
+        ref.current=ref.current+1;
+        alert(ref.current);
+    }
 
     return (
         <div>
@@ -254,13 +262,53 @@ export default function UseMemPage(props) {
             <p>expensive:{expensive()}</p>
             <p>{count}</p>
             <button onClick={() => setCount(count + 1)}>add</button>
-            <input value={value} onChange={(e) => {
-                alert("触发了!");
-                setValue(e.target.value)
-            }} />
+            <button onClick={() => handleClick()}>click</button>
         </div>
     );
 }
+
+function UseCallbackPage(props) {
+    const [count, setCount] = useState(0);
+    const addClick = useCallback(() => {
+        let sum = 0;
+        for (let i = 0; i < count; i++) {
+            sum += i;
+        }
+        return sum;
+    }, [count]);
+
+    // const addClick = () => {
+    //   let sum = 0;
+    //   for (let i = 0; i < count; i++) {
+    //     sum += i;
+    //   }
+    //   return sum;
+    // };
+    const [value, setValue] = useState("");
+    return (
+        <div>
+            <h3>UseCallbackPage</h3>
+            <p>{count}</p>
+            <button onClick={() => setCount(count + 1)}>add</button>
+            <input value={value} onChange={(event) => setValue(event.target.value)} />
+            <ChildMemo addClick={addClick} />
+        </div>
+    );
+}
+
+const ChildMemo = memo(function Child({ addClick }) {
+    // useEffect(() => {
+    //     return () => {
+    //         console.log("destroy"); //sy-log
+    //     };
+    // }, []);
+    console.log("Child"); //sy-log
+    return (
+        <div className="border">
+            <button onClick={() => console.log(addClick())}>add</button>
+        </div>
+    );
+});
 
 /**
  * 启动整个 React 应用
@@ -271,4 +319,4 @@ export default function UseMemPage(props) {
  * 3. 调用 scheduleUpdateOnFiber(root, hostFiber) 启动调度
  * 4. Scheduler 回调 performConcurrentWorkOnroot → Render + Commit
  */
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(<UseMemPage/>);
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(<UseMemoPage/>);

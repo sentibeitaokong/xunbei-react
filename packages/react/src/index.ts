@@ -28,5 +28,5 @@
  */
 
 export {REACT_FRAGMENT_TYPE as Fragment} from "shared/ReactSymbols";
-export {useReducer,useState,useMemo} from 'react-reconciler/src/ReactFiberHooks'
+export {useReducer,useState,useMemo,useCallback,useRef} from 'react-reconciler/src/ReactFiberHooks'
 export {Component} from './ReactBaseClasses'
